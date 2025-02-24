@@ -12,6 +12,8 @@ public class ClawCommand extends CommandBase {
     public ClawCommand(Claw claw, GamepadEx gamepadEx) {
         this.claw = claw;
         this.gamepadEx = gamepadEx;
+
+        addRequirements(claw);
     }
 
     @Override

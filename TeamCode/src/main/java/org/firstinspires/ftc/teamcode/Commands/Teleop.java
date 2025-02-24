@@ -26,20 +26,23 @@ public class Teleop extends CommandOpMode {
 
     @Override
     public void initialize() {
-        clawServo = new SimpleServo(hardwareMap, Constants.ServoConstants.clawServo, 0, 360);
-        claw = new Claw(clawServo, telemetry);
-       driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true);
-       drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx);
-       clawCommand  = new ClawCommand(claw, gamepadEx);
-
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
+
+        sleep(500);
 
         motors = new Motor[]{new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)};
+
+        clawServo = new SimpleServo(hardwareMap, Constants.ServoConstants.clawServo, 0, 360);
+
+        driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true);
+        drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx);
+        claw = new Claw(clawServo, telemetry);
+        clawCommand  = new ClawCommand(claw, gamepadEx);
 
         drivetrain.setDefaultCommand(driveCommand);
         claw.setDefaultCommand(clawCommand);

@@ -22,6 +22,8 @@ public class DriveCommand extends CommandBase {
         this.motors = motors;
         this.telemetry = telemetry;
         this.imu = imu;
+
+        addRequirements(drivetrain);
     }
 
     @Override

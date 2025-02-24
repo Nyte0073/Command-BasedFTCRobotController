@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Drivetrain extends SubsystemBase {
     private final Motor frontLeft, frontRight, backLeft, backRight;
@@ -48,6 +49,9 @@ public class Drivetrain extends SubsystemBase {
         telemetry.addData("FrontRight Power Level", frontRight.get());
         telemetry.addData("BackLeft Power", backLeft.get());
         telemetry.addData("BackRight Power", backRight.get());
+
+        telemetry.addLine("IMU");
+        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 }
