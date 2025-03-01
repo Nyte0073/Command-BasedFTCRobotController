@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -12,10 +11,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Drivetrain extends SubsystemBase {
     private final Motor frontLeft, frontRight, backLeft, backRight;
-    final IMU imu;
-    Telemetry telemetry;
+    private final IMU imu;
+    private final Telemetry telemetry;
     private final MecanumDrive mecanumDrive;
-    GamepadEx gamepadEx;
+    private final GamepadEx gamepadEx;
 
     public Drivetrain(Telemetry telemetry, Motor[] motors, IMU imu, GamepadEx gamepadEx) {
         frontLeft = motors[0];
@@ -26,20 +25,19 @@ public class Drivetrain extends SubsystemBase {
         this.telemetry = telemetry;
         mecanumDrive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
         this.gamepadEx = gamepadEx;
+
+        frontLeft.setInverted(true);
+        backLeft.setInverted(true);
+        mecanumDrive.setRightSideInverted(false);
     }
 
     public void drive(boolean fieldOriented) {
-        double heading = imu.getRobotYawPitchRollAngles().getYaw();
+        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         if(fieldOriented) {
             mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), gamepadEx.getRightX(), heading);
         } else {
             mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), gamepadEx.getRightX());
         }
-    }
-
-    @Override
-    public void setDefaultCommand(Command defaultCommand) {
-        super.setDefaultCommand(defaultCommand);
     }
 
     @Override
@@ -51,7 +49,7 @@ public class Drivetrain extends SubsystemBase {
         telemetry.addData("BackRight Power", backRight.get());
 
         telemetry.addLine("IMU");
-        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
         telemetry.update();
     }
 }

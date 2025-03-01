@@ -68,22 +68,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string translatable="false" name="pref_ftc_season_year_of_current_rc">pref_ftc_season_year_of_current_rc_new</string>
 
   <string name="packageName">@string/packageNameRobotController</string>
-    <string name="permRcWriteExternalStorageExplain">1</string>
-    <string name="permRcReadExternalStorageExplain">1</string>
-    <string name="permRcCameraExplain">1</string>
-    <string name="permAccessLocationExplain">1</string>
-    <string name="permReadPhoneState">1</string>
-    <string name="permGenericExplain">1</string>
-    <string name="pref_wifi_automute">1</string>
-    <string name="pref_warn_about_2_4_ghz_band">1</string>
-    <string name="pref_warn_about_obsolete_software">1</string>
-    <string name="pref_warn_about_mismatched_app_versions">1</string>
-    <string name="pref_warn_about_incorrect_clocks">1</string>
-    <string name="pref_rc_connected">1</string>
-    <string name="pref_pairing_kind">1</string>
-    <string name="toastRestartRobotComplete">1</string>
-    <string name="pref_app_theme">1</string>
-    <string name="appThemeChangeRestartNotifyRC">1</string>
-    <string name="toastRobotSetupComplete">1</string>
+    <string name="permRcWriteExternalStorageExplain">The Robot Controller must be able to access external storage for the Blocks and OnBot Java development environments and robot logging. It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="permRcReadExternalStorageExplain">
+The Robot Controller must be able to access external storage for the Blocks and OnBot Java development environments and robot logging. It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="permRcCameraExplain">The Robot Controller must be able to access the camera in order to enable computer vision features. Regardless of whether or not your OpMode uses these features, you must allow this permission. It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="permAccessLocationExplain">The SDK infrastructure does Wi-Fi scans to help with pairing of phones. Knowing what access points are available can allow an application to know an approximation of its location. Even though the SDK does not use location information, Android requires that we ask for this permission. It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="permReadPhoneState">The SDK uses this to access the device serial number. This may be used for diagnostic purposes. FIRST does not store the serial number off device or use it in any other fashion. Android requires that we ask for this permission. It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="permGenericExplain">It is not possible to run the application without this permission. You must allow all permissions.</string>
+    <string name="pref_wifi_automute">Wi-Fi Auto Mute</string>
+    <string name="pref_warn_about_2_4_ghz_band">pref_warn_about_2_4_ghz_band</string>
+    <string name="pref_warn_about_obsolete_software">pref_warn_about_obsolete_software</string>
+    <string name="pref_warn_about_mismatched_app_versions">pref_warn_about_mismatched_app_versions</string>
+    <string name="pref_warn_about_incorrect_clocks">pref_warn_about_incorrect_clocks</string>
+    <string name="pref_rc_connected">pref_rc_connected</string>
+    <string name="pref_pairing_kind">pref_pairing_kind</string>
+    <string name="toastRestartRobotComplete">
+Restart Robot Complete</string>
+    <string name="pref_app_theme">
+pref_app_theme</string>
+    <string name="appThemeChangeRestartNotifyRC">
+App color scheme has changed. The robot controller will restart.</string>
+    <string name="toastRobotSetupComplete">Robot Setup Complete</string>
 
 </resources>

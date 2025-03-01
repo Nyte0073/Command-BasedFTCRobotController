@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 
@@ -13,19 +12,10 @@ public class Claw extends SubsystemBase {
         this.telemetry = telemetry;
         this.claw = claw;
         claw.setRange(0, 360);
-    }
-
-    public void rotateClawByDegrees(double angle) {
-        claw.rotateByAngle(angle);
-    }
-
-    public void reset() {
         claw.setPosition(0);
     }
-
-    @Override
-    public void setDefaultCommand(Command defaultCommand) {
-        super.setDefaultCommand(defaultCommand);
+    public void rotateClawByDegrees(double angle) {
+        claw.rotateByAngle(angle);
     }
 
     @Override

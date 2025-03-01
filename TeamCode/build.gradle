@@ -21,6 +21,10 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
+
+    defaultConfig {
+        applicationId "com.qualcomm.ftcrobotcontroller"  // Replace with your actual package name
+    }
 }
 
 dependencies {

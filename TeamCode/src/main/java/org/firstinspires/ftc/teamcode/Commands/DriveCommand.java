@@ -15,8 +15,8 @@ public class DriveCommand extends CommandBase {
     Motor[] motors;
     Telemetry telemetry;
     IMU imu;
-    public DriveCommand(Motor[] motors, Telemetry telemetry, IMU imu, GamepadEx gamepadEx, boolean fieldOriented) {
-        drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx);
+    public DriveCommand(Motor[] motors, Telemetry telemetry, IMU imu, GamepadEx gamepadEx, boolean fieldOriented, Drivetrain drivetrain) {
+        this.drivetrain = drivetrain;
         this.fieldOriented = fieldOriented;
         this.gamepadEx = gamepadEx;
         this.motors = motors;
