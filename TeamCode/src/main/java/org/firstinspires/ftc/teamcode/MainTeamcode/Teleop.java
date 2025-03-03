@@ -1,35 +1,30 @@
 package org.firstinspires.ftc.teamcode.MainTeamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
-
-import org.firstinspires.ftc.teamcode.Commands.ClawCommand;
 import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.Subsystems.Claw;
+import org.firstinspires.ftc.teamcode.Otos_Mecanum.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
 
 @TeleOp(name = "Teleop", group = "teamcode")
 public class Teleop extends CommandOpMode {
     Motor[] motors;
-    private DriveCommand driveCommand;
-    private ClawCommand clawCommand;
     private Drivetrain drivetrain;
-    private ServoEx clawServo;
-    private Claw claw;
+    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+   static IMU imu;
 
     @Override
     public void initialize() {
         final GamepadEx gamepadEx = new GamepadEx(gamepad1);
 
-        final IMU imu = hardwareMap.get(IMU.class, "imu");
+         imu = hardwareMap.get(IMU.class, "imu");
 
-        final IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+        final IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
 
         imu.initialize(parameters);
@@ -41,21 +36,21 @@ public class Teleop extends CommandOpMode {
                 new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)};
 
-        clawServo = new SimpleServo(hardwareMap, Constants.ServoConstants.clawServo, 0, 360);
-
         drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx);
-        driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain);
-        claw = new Claw(clawServo, telemetry);
-        clawCommand = new ClawCommand(claw, gamepadEx);
+        DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain);
 
-        register(claw, drivetrain);
+        register(drivetrain);
 
         drivetrain.setDefaultCommand(driveCommand);
-        claw.setDefaultCommand(clawCommand);
+
+        imu.resetYaw();
     }
 
     @Override
     public void run() {
-
+        mecanumDrive.updatePoseEstimate();
+        telemetry.addData("Robot Position X", mecanumDrive.pose.position.x);
+        telemetry.addData("Robot Position Y", mecanumDrive.pose.position.y);
+        drivetrain.periodic();
     }
 }

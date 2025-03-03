@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Drivetrain extends SubsystemBase {
     private final Motor frontLeft, frontRight, backLeft, backRight;
-    private final IMU imu;
+    public final IMU imu;
     private final Telemetry telemetry;
     public final MecanumDrive mecanumDrive;
     private final GamepadEx gamepadEx;
@@ -31,6 +31,12 @@ public class Drivetrain extends SubsystemBase {
         frontRight = motors[1];
         backLeft = motors[2];
         backRight = motors[3];
+
+        frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
         this.imu = imu;
         this.telemetry = telemetry;
         mecanumDrive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
@@ -39,14 +45,16 @@ public class Drivetrain extends SubsystemBase {
         frontLeft.setInverted(true);
         backLeft.setInverted(true);
         mecanumDrive.setRightSideInverted(false);
+
+        mecanumDrive.setRange(-1, 1);
     }
 
     public void drive(boolean fieldOriented) {
-        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         if(fieldOriented) {
-            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), gamepadEx.getRightX(), heading);
+            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX(), heading);
         } else {
-            mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), gamepadEx.getRightX());
+            mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX());
         }
     }
 
@@ -56,8 +64,6 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        robotPose = odometry.updateWithTime((double) System.currentTimeMillis() / 1000, Rotation2d.fromDegrees(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)), wheelSpeeds);
-
         telemetry.addLine("MOTOR POWERS");
         telemetry.addData("FrontLeft Power", frontLeft.get());
         telemetry.addData("FrontRight Power Level", frontRight.get());
@@ -65,7 +71,7 @@ public class Drivetrain extends SubsystemBase {
         telemetry.addData("BackRight Power", backRight.get());
 
         telemetry.addLine("IMU");
-        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 }
