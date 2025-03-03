@@ -24,17 +24,6 @@ public class Teleop extends CommandOpMode {
     private Claw claw;
 
     @Override
-    public void runOpMode() {
-        initialize();
-
-        waitForStart();
-
-        while(!isStopRequested() && opModeIsActive()) {
-            run();
-        }
-    }
-
-    @Override
     public void initialize() {
         final GamepadEx gamepadEx = new GamepadEx(gamepad1);
 
@@ -59,7 +48,14 @@ public class Teleop extends CommandOpMode {
         claw = new Claw(clawServo, telemetry);
         clawCommand = new ClawCommand(claw, gamepadEx);
 
+        register(claw, drivetrain);
+
         drivetrain.setDefaultCommand(driveCommand);
         claw.setDefaultCommand(clawCommand);
+    }
+
+    @Override
+    public void run() {
+
     }
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -28,6 +29,14 @@ public class DriveCommand extends CommandBase {
 
     @Override
     public void execute() {
+        if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.A)) {
+            drivetrain.mecanumDrive.setMaxSpeed(0.5);
+        }
+
+        if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.B)) {
+            drivetrain.mecanumDrive.setMaxSpeed(1);
+        }
+
         drivetrain.drive(fieldOriented);
     }
 
