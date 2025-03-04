@@ -83,6 +83,7 @@ public class Teleop extends CommandOpMode {
             TriggerCommand.leftTriggerPressed = true;
             schedule(new TriggerCommand(gamepadEx, telemetry));
         } else if(rightReader.wasJustPressed()) {
+            TriggerCommand.rightTriggerPressed = true;
             schedule(new TriggerCommand(gamepadEx, telemetry));
         }
 

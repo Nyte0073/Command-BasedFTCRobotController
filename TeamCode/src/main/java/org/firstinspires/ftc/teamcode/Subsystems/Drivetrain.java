@@ -52,7 +52,7 @@ public class Drivetrain extends SubsystemBase {
     public void drive(boolean fieldOriented) {
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         if(fieldOriented) {
-            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX(), heading);
+            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), Math.abs(gamepadEx.getLeftY()) <= 0.08 ? 0 : gamepadEx.getLeftY(), -gamepadEx.getRightX(), heading);
         } else {
             mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX());
         }
