@@ -16,20 +16,18 @@ import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Commands.TriggerCommand;
 import org.firstinspires.ftc.teamcode.Otos_Mecanum.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp(name = "Teleop", group = "teamcode")
-public class Teleop extends CommandOpMode {
-    Motor[] motors;
-    private Drivetrain drivetrain;
-    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
-   static IMU imu;
-   static GamepadEx gamepadEx;
-   TriggerReader leftReader, rightReader;
+public class Teleop extends CommandOpMode { //Main class for making the robot function using controller outputs from the human driver.
+    Motor[] motors; //The wheels of the drivetrain referenced in code.
+    private Drivetrain drivetrain; //Drivetrain class to control the four motors.
+    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0)); //MecanumDrive class to update robot's x and y field position.
+   static IMU imu; // IMU for keeping the track of the robot's rotation.
+   static GamepadEx gamepadEx; //Controller class for handling controller inputs from the driver.
+   TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
 
-   List<GamepadKeys.Button> buttons = List.of(
+   List<GamepadKeys.Button> buttons = List.of( //List of controller controls, here for referencing in the code.
            GamepadKeys.Button.A,
            GamepadKeys.Button.B,
            GamepadKeys.Button.X,
@@ -41,45 +39,45 @@ public class Teleop extends CommandOpMode {
    );
 
     @Override
-    public void initialize() {
+    public void initialize() { //This is where you will initialize any variables and set default commands and register subsystems.
         gamepadEx = new GamepadEx(gamepad1);
 
-         imu = hardwareMap.get(IMU.class, "imu");
+         imu = hardwareMap.get(IMU.class, "imu"); //Use hardwareMap.get() method to initialize IMU.
 
         final IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP));
+                RevHubOrientationOnRobot.UsbFacingDirection.UP)); //This is the direction the IMU is facing on the robot. DO NOT change.
 
         imu.initialize(parameters);
 
         sleep(500);
 
-        motors = new Motor[]{new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
+        motors = new Motor[]{new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor), //Initializing motors.
                 new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)};
 
-        drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx);
-        DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain);
+        drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx); //Initializing drivetrain.
+        DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain); //Setting up drive command.
 
-        leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER);
+        leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.
         rightReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        register(drivetrain);
+        register(drivetrain); //Registering drivetrain subsystem for having its periodic() method called automatically.
 
-        drivetrain.setDefaultCommand(driveCommand);
+        drivetrain.setDefaultCommand(driveCommand); //Setting the default command for drivetrain.
 
-        imu.resetYaw();
+        imu.resetYaw(); //Resetting IMU upon every initialization.
     }
 
     @Override
     public void run() {
-        gamepadEx.readButtons();
+        gamepadEx.readButtons(); //Reading button input values every loop.
 
-        mecanumDrive.updatePoseEstimate();
-        telemetry.addData("Robot Position X", mecanumDrive.pose.position.x);
+        mecanumDrive.updatePoseEstimate(); //Update the robot's Pose2d with the robot's current x and y position and rotation.
+        telemetry.addData("Robot Position X", mecanumDrive.pose.position.x); //Output robot's x and y position to console.
         telemetry.addData("Robot Position Y", mecanumDrive.pose.position.y);
 
-        if(leftReader.wasJustPressed()) {
+        if(leftReader.wasJustPressed()) { //If left or right trigger was pressed, schedule a new TriggerCommand().
             TriggerCommand.leftTriggerPressed = true;
             schedule(new TriggerCommand(gamepadEx, telemetry));
         } else if(rightReader.wasJustPressed()) {
@@ -87,12 +85,12 @@ public class Teleop extends CommandOpMode {
             schedule(new TriggerCommand(gamepadEx, telemetry));
         }
 
-        for(GamepadKeys.Button button : buttons) {
+        for(GamepadKeys.Button button : buttons) { //If any button pressed, schedule a new ButtonCommand().
             if(gamepadEx.wasJustPressed(button)) {
                 schedule(new ButtonCommand(gamepadEx, button, telemetry));
             }
         }
 
-        CommandScheduler.getInstance().run();
+        CommandScheduler.getInstance().run(); //Run every scheduled command.
     }
 }

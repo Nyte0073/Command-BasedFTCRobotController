@@ -7,9 +7,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ButtonCommand extends CommandBase {
-    private final GamepadEx gamepadEx;
-    GamepadKeys.Button button;
-    Telemetry telemetry;
+    private final GamepadEx gamepadEx; //Driver's controller.
+    GamepadKeys.Button button; //A button on the driver's controller.
+    Telemetry telemetry; //Source of output information returned from the robot. Essentially the same as SmartDashboard.
     public ButtonCommand(GamepadEx gamepadEx, GamepadKeys.Button button, Telemetry telemetry) {
         this.gamepadEx = gamepadEx;
         this.button = button;
@@ -17,7 +17,7 @@ public class ButtonCommand extends CommandBase {
     }
 
     @Override
-    public void execute() {
+    public void execute() { //Run a different subsystem depending on the type of button that was pressed.
         switch(button) {
             case DPAD_DOWN:
                 telemetry.addData("DPAD_DOWN", "was just pressed.");
