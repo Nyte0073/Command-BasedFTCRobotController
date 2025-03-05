@@ -21,8 +21,8 @@ public class Drivetrain extends SubsystemBase {
     private final Telemetry telemetry; //SmartDashboard remake.
     public final MecanumDrive mecanumDrive; //Controls the robot's four mecanum wheels to drive either field oriented or not.
     private final GamepadEx gamepadEx; //Driver's controller.
-    public Pose2d robotPose; //The robot's current position.
-    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(), new Translation2d(), new Translation2d(), new Translation2d());
+    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(), new Translation2d(),
+            new Translation2d(), new Translation2d()); //TODO Tune Translation2d's to be the right x and y distance from the center of the robot to each wheel.
     public MecanumDriveOdometry odometry = new MecanumDriveOdometry( // Mecanum Drive odometry. Don't worry about this for now.
             kinematics, new Rotation2d(0)
     );
@@ -65,14 +65,15 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void updateWheelsSpeeds() {
-        wheelSpeeds.frontLeftMetersPerSecond = frontLeft.get() * frontLeft.getMaxRPM() * ((double) 1 /60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.frontRightMetersPerSecond = frontRight.get() * frontRight.getMaxRPM() * ((double) 1 /60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.rearLeftMetersPerSecond = backLeft.get() * backLeft.getMaxRPM() * ((double) 1 /60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.rearRightMetersPerSecond = backRight.get() * backRight.getMaxRPM() * ((double) 1 /60) * ((double) 1/60) * Math.PI * 4;
+        wheelSpeeds.frontLeftMetersPerSecond = frontLeft.get() * frontLeft.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
+        wheelSpeeds.frontRightMetersPerSecond = frontRight.get() * frontRight.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
+        wheelSpeeds.rearLeftMetersPerSecond = backLeft.get() * backLeft.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
+        wheelSpeeds.rearRightMetersPerSecond = backRight.get() * backRight.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
     }
 
     public void updateOdometry() {
-       odometry.updateWithTime((double) System.currentTimeMillis() / 1000, Rotation2d.fromDegrees(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)), wheelSpeeds);
+       odometry.updateWithTime((double) System.currentTimeMillis() / 1000,
+               Rotation2d.fromDegrees(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)), wheelSpeeds);
     }
 
     public Pose2d getRobotPose() {
@@ -81,17 +82,6 @@ public class Drivetrain extends SubsystemBase {
 
     public MecanumDriveKinematics getKinematics() {
         return kinematics;
-    }
-
-    public MecanumDriveWheelSpeeds getWheelSpeeds() {
-        return wheelSpeeds;
-    }
-
-    public void setSpeeds(MecanumDriveWheelSpeeds speeds) {
-        frontLeft.set(speeds.frontLeftMetersPerSecond);
-        frontRight.set(speeds.frontRightMetersPerSecond);
-        backLeft.set(speeds.rearLeftMetersPerSecond);
-        backRight.set(speeds.rearRightMetersPerSecond);
     }
 
     @Override
@@ -107,6 +97,7 @@ public class Drivetrain extends SubsystemBase {
 
         telemetry.addLine("IMU");
         telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("Odometer Position", odometry.getPoseMeters().toString());
         telemetry.update();
     }
 }

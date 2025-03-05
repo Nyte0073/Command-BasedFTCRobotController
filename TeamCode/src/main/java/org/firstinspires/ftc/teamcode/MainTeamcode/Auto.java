@@ -20,7 +20,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import java.util.function.Consumer;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
 
 import java.util.List;
@@ -77,10 +76,7 @@ public class Auto extends CommandOpMode {
                 2.0,
                 outputSpeeds
                 );
-    }
 
-    @Override
-    public void run() {
-
+        command.schedule();
     }
 }

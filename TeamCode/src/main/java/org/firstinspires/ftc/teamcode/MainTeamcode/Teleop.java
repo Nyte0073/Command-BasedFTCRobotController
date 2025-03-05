@@ -21,15 +21,14 @@ import java.util.List;
 @TeleOp(name = "Teleop", group = "teamcode")
 public class Teleop extends CommandOpMode { //Main class for making the robot function using controller outputs from the human driver.
     Motor[] motors; //The wheels of the drivetrain referenced in code.
-    private Drivetrain drivetrain; //Drivetrain class to control the four motors.
-    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0)); //MecanumDrive class to update robot's x and y field position.
+    private Drivetrain drivetrain; //Drivetrain class to control the four motors;
    static IMU imu; // IMU for keeping the track of the robot's rotation.
    static GamepadEx gamepadEx; //Controller class for handling controller inputs from the driver.
    TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
 
-   List<GamepadKeys.Button> buttons = List.of( //List of controller controls, here for referencing in the code.
-           GamepadKeys.Button.A,
-           GamepadKeys.Button.B,
+   List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
+//           GamepadKeys.Button.A,
+//           GamepadKeys.Button.B,
            GamepadKeys.Button.X,
            GamepadKeys.Button.Y,
            GamepadKeys.Button.DPAD_DOWN,
@@ -72,10 +71,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     @Override
     public void run() {
         gamepadEx.readButtons(); //Reading button input values every loop.
-
-        mecanumDrive.updatePoseEstimate(); //Update the robot's Pose2d with the robot's current x and y position and rotation.
-        telemetry.addData("Robot Position X", mecanumDrive.pose.position.x); //Output robot's x and y position to console.
-        telemetry.addData("Robot Position Y", mecanumDrive.pose.position.y);
 
         if(leftReader.wasJustPressed()) { //If left or right trigger was pressed, schedule a new TriggerCommand().
             TriggerCommand.leftTriggerPressed = true;
