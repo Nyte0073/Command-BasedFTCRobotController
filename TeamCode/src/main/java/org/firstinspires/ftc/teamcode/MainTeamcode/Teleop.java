@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.MainTeamcode;
 
+import android.util.Log;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -11,6 +13,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.teamcode.Commands.ButtonCommand;
 import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Commands.TriggerCommand;
@@ -27,8 +30,8 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
    TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
-//           GamepadKeys.Button.A,
-//           GamepadKeys.Button.B,
+           GamepadKeys.Button.A,
+           GamepadKeys.Button.B,
            GamepadKeys.Button.X,
            GamepadKeys.Button.Y,
            GamepadKeys.Button.DPAD_DOWN,
@@ -72,10 +75,10 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     public void run() {
         gamepadEx.readButtons(); //Reading button input values every loop.
 
-        if(leftReader.wasJustPressed()) { //If left or right trigger was pressed, schedule a new TriggerCommand().
+        if(leftReader.isDown()) {//If left or right trigger was pressed, schedule a new TriggerCommand().
             TriggerCommand.leftTriggerPressed = true;
             schedule(new TriggerCommand(gamepadEx, telemetry));
-        } else if(rightReader.wasJustPressed()) {
+        } else if(rightReader.isDown()) {
             TriggerCommand.rightTriggerPressed = true;
             schedule(new TriggerCommand(gamepadEx, telemetry));
         }

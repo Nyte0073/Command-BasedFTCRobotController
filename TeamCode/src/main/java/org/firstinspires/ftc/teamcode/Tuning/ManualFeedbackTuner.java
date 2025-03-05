@@ -4,8 +4,8 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.TheoCode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.TheoCode.SparkFunOTOSDrive;
+import org.firstinspires.ftc.teamcode.Otos_Mecanum.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Otos_Mecanum.SparkFunOTOSDrive;
 
 public final class ManualFeedbackTuner extends LinearOpMode {
     public static double DISTANCE = 40;

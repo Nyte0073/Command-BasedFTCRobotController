@@ -89,15 +89,15 @@ public class Drivetrain extends SubsystemBase {
         updateWheelsSpeeds();
         updateOdometry();
 
-        telemetry.addLine("MOTOR POWERS");
-        telemetry.addData("FrontLeft Power", frontLeft.get());
-        telemetry.addData("FrontRight Power Level", frontRight.get());
-        telemetry.addData("BackLeft Power", backLeft.get());
-        telemetry.addData("BackRight Power", backRight.get());
-
-        telemetry.addLine("IMU");
-        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-        telemetry.addData("Odometer Position", odometry.getPoseMeters().toString());
-        telemetry.update();
+//        telemetry.addLine("MOTOR POWERS");
+//        telemetry.addData("FrontLeft Power", frontLeft.get());
+//        telemetry.addData("FrontRight Power Level", frontRight.get());
+//        telemetry.addData("BackLeft Power", backLeft.get());
+//        telemetry.addData("BackRight Power", backRight.get());
+//
+//        telemetry.addLine("IMU");
+//        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+//        telemetry.addData("Odometer Position", odometry.getPoseMeters().toString());
+//        telemetry.update();
     }
 }

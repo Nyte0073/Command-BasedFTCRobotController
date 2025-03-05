@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.TheoCode.SparkFunOTOSDrive;
+import org.firstinspires.ftc.teamcode.Otos_Mecanum.SparkFunOTOSDrive;
 @TeleOp
 public class OTOSAngularScalar extends LinearOpMode {
 

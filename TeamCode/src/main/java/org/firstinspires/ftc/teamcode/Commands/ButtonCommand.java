@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.Commands;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ButtonCommand extends CommandBase {
@@ -40,6 +43,7 @@ public class ButtonCommand extends CommandBase {
                 break;
 
             case A:
+                Log.i(FtcRobotControllerActivity.TAG, "A was pressed.");
                 telemetry.addData("A", "was just pressed.");
                 telemetry.update();
                 break;
