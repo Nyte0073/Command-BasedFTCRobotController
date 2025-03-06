@@ -86,7 +86,7 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() { //Returns motor powers and the robot's rotation calculated from the IMU.
-        updateWheelsSpeeds();
+        updateWheelsSpeeds(); //This method has to be called first before the odometry is updated.
         updateOdometry();
 
 //        telemetry.addLine("MOTOR POWERS");

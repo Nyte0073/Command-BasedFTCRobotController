@@ -38,9 +38,9 @@ public class TriggerCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) { //Depending on which trigger has been pressed and released, resets their boolean state back to normal.
-        if(leftTriggerPressed) {
+        if(leftTriggerPressed && !leftTriggerReader.isDown()) {
             leftTriggerPressed = false;
-        } else if(rightTriggerPressed) {
+        } else if(rightTriggerPressed && !rightTriggerReader.isDown()) {
             rightTriggerPressed = false;
         }
     }

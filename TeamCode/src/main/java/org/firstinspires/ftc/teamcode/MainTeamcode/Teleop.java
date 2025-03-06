@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.MainTeamcode;
 
-import android.util.Log;
-
-import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -13,11 +10,9 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.teamcode.Commands.ButtonCommand;
 import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Commands.TriggerCommand;
-import org.firstinspires.ftc.teamcode.Otos_Mecanum.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
 import java.util.List;
 
