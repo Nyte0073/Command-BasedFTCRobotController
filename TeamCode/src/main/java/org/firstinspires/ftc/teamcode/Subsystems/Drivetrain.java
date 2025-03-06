@@ -97,7 +97,7 @@ public class Drivetrain extends SubsystemBase {
 //
 //        telemetry.addLine("IMU");
 //        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-//        telemetry.addData("Odometer Position", odometry.getPoseMeters().toString());
+//        telemetry.addData("Odometer Position", getRobotPose().toString());
 //        telemetry.update();
     }
 }
