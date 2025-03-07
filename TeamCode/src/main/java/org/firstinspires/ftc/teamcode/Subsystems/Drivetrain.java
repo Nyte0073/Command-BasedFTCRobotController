@@ -21,8 +21,8 @@ public class Drivetrain extends SubsystemBase {
     private final Telemetry telemetry; //SmartDashboard remake.
     public final MecanumDrive mecanumDrive; //Controls the robot's four mecanum wheels to drive either field oriented or not.
     private final GamepadEx gamepadEx; //Driver's controller.
-    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(), new Translation2d(),
-            new Translation2d(), new Translation2d()); //TODO Tune Translation2d's to be the right x and y distance from the center of the robot to each wheel.
+    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(7.5625, 7.375), new Translation2d(7.5625, 7.375),
+            new Translation2d(7.5625, 7.375), new Translation2d(7.5625, 7.375)); //TODO Tune Translation2d's to be the right x and y distance from the center of the robot to each wheel.
     public MecanumDriveOdometry odometry = new MecanumDriveOdometry( // Mecanum Drive odometry. Don't worry about this for now.
             kinematics, new Rotation2d(0)
     );
@@ -65,10 +65,10 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void updateWheelsSpeeds() {
-        wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
-        wheelSpeeds.frontRightMetersPerSecond = (frontRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
-        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
-        wheelSpeeds.rearRightMetersPerSecond = (backRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
+        wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57) * 0.0254;
+        wheelSpeeds.frontRightMetersPerSecond = (frontRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57) * 0.0254;
+        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57) * 0.0254;
+        wheelSpeeds.rearRightMetersPerSecond = (backRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57) * 0.0254;
     }
 
     public void updateOdometry() {
@@ -89,15 +89,21 @@ public class Drivetrain extends SubsystemBase {
         updateWheelsSpeeds(); //This method has to be called first before the odometry is updated.
         updateOdometry();
 
-//        telemetry.addLine("MOTOR POWERS");
-//        telemetry.addData("FrontLeft Power", frontLeft.get());
-//        telemetry.addData("FrontRight Power Level", frontRight.get());
-//        telemetry.addData("BackLeft Power", backLeft.get());
-//        telemetry.addData("BackRight Power", backRight.get());
-//
-//        telemetry.addLine("IMU");
-//        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-//        telemetry.addData("Odometer Position", getRobotPose().toString());
-//        telemetry.update();
+        telemetry.addLine("MOTOR POWERS");
+        telemetry.addData("FrontLeft Power", frontLeft.get());
+        telemetry.addData("FrontRight Power Level", frontRight.get());
+        telemetry.addData("BackLeft Power", backLeft.get());
+        telemetry.addData("BackRight Power", backRight.get());
+
+        telemetry.addLine("IMU");
+        telemetry.addData("IMU orientation", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("Odometer Position", getRobotPose().toString());
+
+        telemetry.addLine("MOTOR RPM");
+        telemetry.addData("Front Left Max RPM", frontLeft.getMaxRPM());
+        telemetry.addData("Front Right Max RPM", frontRight.getMaxRPM());
+        telemetry.addData("Back Left Max RPM", backLeft.getMaxRPM());
+        telemetry.addData("Back Right Max RPM", backRight.getMaxRPM());
+        telemetry.update();
     }
 }
