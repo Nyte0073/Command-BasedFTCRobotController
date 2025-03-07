@@ -65,10 +65,10 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void updateWheelsSpeeds() {
-        wheelSpeeds.frontLeftMetersPerSecond = frontLeft.get() * frontLeft.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.frontRightMetersPerSecond = frontRight.get() * frontRight.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.rearLeftMetersPerSecond = backLeft.get() * backLeft.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
-        wheelSpeeds.rearRightMetersPerSecond = backRight.get() * backRight.getMaxRPM() * ((double) 1/60) * ((double) 1/60) * Math.PI * 4;
+        wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
+        wheelSpeeds.frontRightMetersPerSecond = (frontRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
+        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
+        wheelSpeeds.rearRightMetersPerSecond = (backRight.get() * frontLeft.getMaxRPM() * 13.3) / 60 * (12.57);
     }
 
     public void updateOdometry() {
