@@ -66,8 +66,8 @@ public class Drivetrain extends SubsystemBase {
 
     public void updateWheelsSpeeds() {
         wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
-        wheelSpeeds.frontRightMetersPerSecond = (backLeft.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
-        wheelSpeeds.rearLeftMetersPerSecond = (frontRight.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
+        wheelSpeeds.frontRightMetersPerSecond = (frontRight.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
+        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
         wheelSpeeds.rearRightMetersPerSecond = (backRight.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
     }
 
