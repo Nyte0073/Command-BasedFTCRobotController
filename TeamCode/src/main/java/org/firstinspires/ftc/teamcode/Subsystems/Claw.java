@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 
@@ -14,7 +16,7 @@ public class Claw extends SubsystemBase {
 
     /**Constructs a new {@code Claw()} with an initialized claw {@code Servo}
      * and {@code Telemetry}.*/
-    public Claw(ServoEx claw, Telemetry telemetry) {
+    public Claw(@NonNull ServoEx claw, Telemetry telemetry) {
         this.telemetry = telemetry;
         this.claw = claw;
         claw.setRange(0, 360);

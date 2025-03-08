@@ -18,9 +18,17 @@ import java.util.List;
 
 @TeleOp(name = "Teleop", group = "teamcode")
 public class Teleop extends CommandOpMode { //Main class for making the robot function using controller outputs from the human driver.
-    Motor[] motors; //The wheels of the drivetrain referenced in code.
-    static IMU imu; // IMU for keeping the track of the robot's rotation.
-   static GamepadEx gamepadEx; //Controller class for handling controller inputs from the driver.
+
+    /**The drivetrain's motors.*/
+    Motor[] motors;
+
+    /**The robot's gyroscope system.*/
+    static IMU imu;
+
+    /**The driver's controller.*/
+    static GamepadEx gamepadEx;
+
+    /**Reader for one of the driver's controller's triggers.*/
    public static TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
