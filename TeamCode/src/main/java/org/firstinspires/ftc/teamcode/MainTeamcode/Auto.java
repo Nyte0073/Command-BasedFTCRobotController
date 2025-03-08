@@ -26,23 +26,28 @@ import java.util.List;
 
 @Autonomous(name = "Auto", group = "teamcode")
 public class Auto extends CommandOpMode {
+
+    /**The robot's drivetrain.*/
     Drivetrain drivetrain;
 
-    Motor[] motors = new Motor[] {
-            new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)
-    };
-
+    /**The driver's controller.*/
     GamepadEx gamepadEx;
 
+    /**The robot's gyroscope system.*/
     IMU imu;
 
-    MecanumControllerCommand command;
+    /**The robot's path-planning controller.*/
+    MecanumControllerCommand command; //Command to control robot's path-planning.
 
     @Override
     public void initialize() {
+        Motor[] motors = new Motor[] { //Initializing motors.
+                new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
+                new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
+                new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
+                new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)
+        };
+
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
@@ -58,13 +63,7 @@ public class Auto extends CommandOpMode {
                 new TrajectoryConfig(2.0, 2.0)
         );
 
-        Consumer <MecanumDriveWheelSpeeds> outputSpeeds =
-                (m) -> {
-                    telemetry.addData("Front Left Wheel Speeds", m.frontLeftMetersPerSecond);
-                    telemetry.addData("Front Right Wheel Speeds", m.frontRightMetersPerSecond);
-                    telemetry.addData("Back Left Wheel Speeds", m.rearLeftMetersPerSecond);
-                    telemetry.addData("Back Right Wheel Speeds", m.rearRightMetersPerSecond);
-                };
+        Consumer <MecanumDriveWheelSpeeds> outputSpeeds = mecanumDriveWheelSpeeds -> drivetrain.set(mecanumDriveWheelSpeeds);
 
         command = new MecanumControllerCommand(
                 firstTrajectory,
@@ -72,10 +71,12 @@ public class Auto extends CommandOpMode {
                 drivetrain.getKinematics(),
                 new PIDController(1, 0, 0),
                 new PIDController(1, 0, 0),
-                new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints()),
+                new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(3.0, 3.0)),
                 2.0,
                 outputSpeeds
                 );
+
+        register(drivetrain);
 
         command.schedule();
     }

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "Encoder Tuning", group = "teamcode")
 public class EncoderTuning extends LinearOpMode {
+    /**Representation of one of the robot's drivetrain motors.*/
     private DcMotor leftFront, rightFront, leftBack, rightBack;
     @Override
     public void runOpMode() {

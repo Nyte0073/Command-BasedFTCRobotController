@@ -10,9 +10,17 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ButtonCommand extends CommandBase {
-    private final GamepadEx gamepadEx; //Driver's controller.
-    GamepadKeys.Button button; //A button on the driver's controller.
-    Telemetry telemetry; //Source of output information returned from the robot. Essentially the same as SmartDashboard.
+    /**The driver's controller.*/
+    private final GamepadEx gamepadEx;
+
+    /**Representation of a button on the driver's controller.*/
+    GamepadKeys.Button button;
+
+    /**The robot's telemetry system.*/
+    Telemetry telemetry;
+
+    /**Constructs a new {@code ButtonCommand} with initialized {@code GamepadEx}, {@code GamepadEx.Button}'s,
+     and {@code Telemetry}.*/
     public ButtonCommand(GamepadEx gamepadEx, GamepadKeys.Button button, Telemetry telemetry) {
         this.gamepadEx = gamepadEx;
         this.button = button;

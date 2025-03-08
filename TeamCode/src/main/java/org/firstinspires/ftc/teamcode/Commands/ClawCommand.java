@@ -6,9 +6,14 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.Subsystems.Claw;
 
 public class ClawCommand extends CommandBase {
+
+    /**The robot's claw.*/
     private final Claw claw;
+
+    /**The driver's controller.*/
     private final GamepadEx gamepadEx;
 
+    /**Constructs a new {@code ClawCommand} with an initialized {@code Claw} and {@code GamepadEx}.*/
     public ClawCommand(Claw claw, GamepadEx gamepadEx) {
         this.claw = claw;
         this.gamepadEx = gamepadEx;
