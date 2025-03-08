@@ -19,10 +19,9 @@ import java.util.List;
 @TeleOp(name = "Teleop", group = "teamcode")
 public class Teleop extends CommandOpMode { //Main class for making the robot function using controller outputs from the human driver.
     Motor[] motors; //The wheels of the drivetrain referenced in code.
-    private Drivetrain drivetrain; //Drivetrain class to control the four motors;
-   static IMU imu; // IMU for keeping the track of the robot's rotation.
+    static IMU imu; // IMU for keeping the track of the robot's rotation.
    static GamepadEx gamepadEx; //Controller class for handling controller inputs from the driver.
-   TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
+   public static TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
            GamepadKeys.Button.A,
@@ -53,7 +52,8 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
                 new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)};
 
-        drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx); //Initializing drivetrain.
+        //Drivetrain class to control the four motors;
+        Drivetrain drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx); //Initializing drivetrain.
         DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain); //Setting up drive command.
 
         leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.
@@ -72,10 +72,10 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
 
         if(leftReader.isDown()) {//If left or right trigger was pressed, schedule a new TriggerCommand().
             TriggerCommand.leftTriggerPressed = true;
-            schedule(new TriggerCommand(gamepadEx, telemetry));
+            schedule(new TriggerCommand(telemetry));
         } else if(rightReader.isDown()) {
             TriggerCommand.rightTriggerPressed = true;
-            schedule(new TriggerCommand(gamepadEx, telemetry));
+            schedule(new TriggerCommand(telemetry));
         }
 
         for(GamepadKeys.Button button : buttons) { //If any button pressed, schedule a new ButtonCommand().

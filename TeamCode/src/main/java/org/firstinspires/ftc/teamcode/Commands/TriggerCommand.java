@@ -1,26 +1,23 @@
 package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.TriggerReader;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.MainTeamcode.Teleop;
 
 public class TriggerCommand extends CommandBase {
-    public TriggerReader leftTriggerReader, rightTriggerReader; //Readers for left and right trigger output values.
-
     public static boolean leftTriggerPressed = false, rightTriggerPressed = false; //Booleans for keeping track of the triggers' states.
     Telemetry telemetry;
+    boolean leftTriggerDown, rightTriggerDown;
 
-    public TriggerCommand(GamepadEx gamepadEx, Telemetry telemetry) {
+    public TriggerCommand(Telemetry telemetry) {
         this.telemetry = telemetry; //Setting up telemetry.
-        leftTriggerReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up trigger readers.
-        rightTriggerReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.RIGHT_TRIGGER);
     }
 
     @Override
     public void execute() {
+        leftTriggerDown = Teleop.leftReader.isDown();
+        rightTriggerDown = Teleop.rightReader.isDown();
        if(leftTriggerPressed) { //Run a certain subsystem depending on which trigger was pressed.
            telemetry.addData("Left Trigger", "was just pressed.");
            telemetry.update();
@@ -31,16 +28,16 @@ public class TriggerCommand extends CommandBase {
     }
 
     @Override
-    public boolean isFinished() { //Ends the command depending on if the trigger pressed has now been released.
-        return leftTriggerPressed ? leftTriggerReader.wasJustReleased()
-                : rightTriggerReader.wasJustReleased();
+    public boolean isFinished() {
+        return leftTriggerPressed ? !leftTriggerDown :
+                !rightTriggerDown;
     }
 
     @Override
-    public void end(boolean interrupted) { //Depending on which trigger has been pressed and released, resets their boolean state back to normal.
-        if(leftTriggerPressed && !leftTriggerReader.isDown()) {
+    public void end(boolean interrupted) {
+        if(leftTriggerPressed) {
             leftTriggerPressed = false;
-        } else if(rightTriggerPressed && !rightTriggerReader.isDown()) {
+        } else if(rightTriggerPressed) {
             rightTriggerPressed = false;
         }
     }
