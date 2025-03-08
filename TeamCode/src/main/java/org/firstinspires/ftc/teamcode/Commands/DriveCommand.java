@@ -16,6 +16,7 @@ public class DriveCommand extends CommandBase {
     Motor[] motors; //Drivetrain's motors.
     Telemetry telemetry; //SmartDashboard remake.
     IMU imu; //Gyroscope system for calculating robot's rotation.
+    
     public DriveCommand(Motor[] motors, Telemetry telemetry, IMU imu, GamepadEx gamepadEx, boolean fieldOriented, Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
         this.fieldOriented = fieldOriented;
@@ -28,7 +29,7 @@ public class DriveCommand extends CommandBase {
     }
 
     @Override
-    public void execute() {
+    public void execute() { 
         if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.A)) { //If button A was pressed, cut the max speed of the robot in half.
             drivetrain.mecanumDrive.setMaxSpeed(0.5);
         }
