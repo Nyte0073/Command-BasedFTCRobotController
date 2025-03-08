@@ -94,10 +94,10 @@ public class Drivetrain extends SubsystemBase {
 
     /**Updates the robot's wheel speed system with the current speeds of the robot's wheels.*/
     public void updateWheelsSpeeds() {
-        wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
-        wheelSpeeds.frontRightMetersPerSecond = (frontRight.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
-        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
-        wheelSpeeds.rearRightMetersPerSecond = (backRight.getCorrectedVelocity() * 12.56 * 0.0254) / 1440;
+        wheelSpeeds.frontLeftMetersPerSecond = (frontLeft.getCorrectedVelocity() * 12.56 * 0.1016) / 1440;
+        wheelSpeeds.frontRightMetersPerSecond = (frontRight.getCorrectedVelocity() * 12.56 * 0.1016) / 1440;
+        wheelSpeeds.rearLeftMetersPerSecond = (backLeft.getCorrectedVelocity() * 12.56 * 0.1016) / 1440;
+        wheelSpeeds.rearRightMetersPerSecond = (backRight.getCorrectedVelocity() * 12.56 * 0.1016) / 1440;
     }
 
     /**Updates the robot's odometry system with the current X and Y coordinate of the robot on the field,
