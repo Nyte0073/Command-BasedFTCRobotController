@@ -111,5 +111,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
         telemetry.update();
+
+        sleep(20);
     }
 }
