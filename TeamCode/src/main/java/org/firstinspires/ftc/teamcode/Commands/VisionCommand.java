@@ -8,19 +8,26 @@ import org.firstinspires.ftc.teamcode.Subsystems.Vision;
 public class VisionCommand extends CommandBase {
     public static boolean isRange = false;
     Vision vision;
-    States state;
+    static States state;
 
     public VisionCommand(Vision vision, States state) {
         this.vision = vision;
-        this.state = state;
+        VisionCommand.state = state;
         addRequirements(vision);
+    }
+
+    public static States getState() {
+        return state;
     }
 
     @Override
     public void execute() {
+        if(isRange) {
+            state = States.IN_RANGE;
+        }
+
        switch(state) {
            case IN_RANGE:
-               Teleop.stateReady = true;
                break;
 
            case NOT_IN_RANGE:

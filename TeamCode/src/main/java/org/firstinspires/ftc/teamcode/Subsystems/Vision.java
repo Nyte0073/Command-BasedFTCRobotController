@@ -30,6 +30,7 @@ public class Vision extends SubsystemBase {
         telemetry.addLine("HUSKY LENS DATA");
         telemetry.addData("Husky Lens Block Count", huskyLens.blocks().length);
         telemetry.addData("Husky Lens First Piece Info", hasBlock() ? huskyLens.blocks()[0].toString() : "HuskyLens doesn't have a piece.");
+        telemetry.addData("Vision State", VisionCommand.getState());
 
         if(!VisionCommand.isRange && (block == null ? -1 : block.y) > 0 && (hasBlock() ? block.y : 0) < 100) {
             VisionCommand.isRange = true;

@@ -42,7 +42,8 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
    HuskyLens huskyLens;
 
    /**Vision subsystem class for updating the state of the robot based on the output from the HuskyLens.*/
-    Vision vision;
+    static Vision vision;
+    static VisionCommand visionCommand;
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
            GamepadKeys.Button.A,
@@ -80,10 +81,13 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         huskyLens = hardwareMap.get(HuskyLens.class, "huskyLens"); //Initializing huskyLens.
         vision = new Vision(huskyLens, telemetry); //Initializing vision.
 
+        visionCommand = new VisionCommand(vision, VisionCommand.States.NOT_IN_RANGE);
+        vision.setDefaultCommand(visionCommand);
+
         leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.
         rightReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        register(drivetrain); //Registering drivetrain subsystem for having its periodic() method called automatically.
+        register(drivetrain, vision); //Registering drivetrain subsystem for having its periodic() method called automatically.
 
         drivetrain.setDefaultCommand(driveCommand); //Setting the default command for drivetrain.
 
@@ -106,10 +110,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
             if(gamepadEx.wasJustPressed(button)) {
                 schedule(new ButtonCommand(gamepadEx, button, telemetry));
             }
-        }
-
-        if(stateReady) { //If the robot is correctly aligned and is in a drivable range to the object, schedule the robot to drive to the piece.
-            schedule(new VisionCommand(vision, VisionCommand.States.IN_RANGE));
         }
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
