@@ -28,10 +28,8 @@ public class TriggerCommand extends CommandBase {
 
        if(leftTriggerPressed) { //Run a certain subsystem depending on which trigger was pressed.
            telemetry.addData("Left Trigger", "was just pressed.");
-           telemetry.update();
        } else if(rightTriggerPressed) {
             telemetry.addData("Right trigger", "was just pressed.");
-            telemetry.update();
        }
     }
 

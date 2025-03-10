@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-
-import org.firstinspires.ftc.teamcode.MainTeamcode.Teleop;
 import org.firstinspires.ftc.teamcode.Subsystems.Vision;
 
 public class VisionCommand extends CommandBase {
@@ -28,6 +26,7 @@ public class VisionCommand extends CommandBase {
 
        switch(state) {
            case IN_RANGE:
+               state = States.NOT_IN_RANGE;
                break;
 
            case NOT_IN_RANGE:

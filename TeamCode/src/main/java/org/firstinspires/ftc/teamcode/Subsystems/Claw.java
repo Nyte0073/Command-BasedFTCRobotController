@@ -33,6 +33,5 @@ public class Claw extends SubsystemBase {
     public void periodic() {
         telemetry.addLine("CLAW POSITIONS");
         telemetry.addData("Claw Position", claw.getPosition());
-        telemetry.update();
     }
 }

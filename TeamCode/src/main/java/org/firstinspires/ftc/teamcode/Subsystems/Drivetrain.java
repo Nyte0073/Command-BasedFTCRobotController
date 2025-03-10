@@ -141,6 +141,5 @@ public class Drivetrain extends SubsystemBase {
         telemetry.addData("Front Right Max RPM", frontRight.getMaxRPM());
         telemetry.addData("Back Left Max RPM", backLeft.getMaxRPM());
         telemetry.addData("Back Right Max RPM", backRight.getMaxRPM());
-        telemetry.update();
     }
 }

@@ -35,9 +35,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     /**Reader for one of the driver's controller's triggers.*/
    public static TriggerReader leftReader, rightReader;
 
-   /**Boolean state for whether the robot is close enough to an object on the field to pick up.*/
-   public static boolean stateReady = false;
-
    /**Robot's vision system.*/
    HuskyLens huskyLens;
 
@@ -76,7 +73,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
 
         //Drivetrain class to control the four motors;
         Drivetrain drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx); //Initializing drivetrain.
-        DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain); //Setting up drive command.
+        DriveCommand driveCommand = new DriveCommand(motors, imu, gamepadEx, true, drivetrain); //Setting up drive command.
 
         huskyLens = hardwareMap.get(HuskyLens.class, "huskyLens"); //Initializing huskyLens.
         vision = new Vision(huskyLens, telemetry); //Initializing vision.
@@ -113,5 +110,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         }
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
+        telemetry.update();
     }
 }

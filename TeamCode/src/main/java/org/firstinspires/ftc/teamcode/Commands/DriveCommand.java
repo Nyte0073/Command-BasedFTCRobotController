@@ -6,7 +6,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
 
 public class DriveCommand extends CommandBase {
@@ -23,19 +22,15 @@ public class DriveCommand extends CommandBase {
     /**The drivetrain's motors.*/
     Motor[] motors;
 
-    /**The robot's telemetry system.*/
-    Telemetry telemetry;
-
     /**The robot's gyroscope system.*/
     IMU imu;
 
     /**Constructs a new {@code DriveCommand()} with initialized {@code Motor}'s, {@code Telemetry}, {@code IMU} and {@code GamepadEx.} */
-    public DriveCommand(Motor[] motors, Telemetry telemetry, IMU imu, GamepadEx gamepadEx, boolean fieldOriented, Drivetrain drivetrain) {
+    public DriveCommand(Motor[] motors, IMU imu, GamepadEx gamepadEx, boolean fieldOriented, Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
         this.fieldOriented = fieldOriented;
         this.gamepadEx = gamepadEx;
         this.motors = motors;
-        this.telemetry = telemetry;
         this.imu = imu;
 
         addRequirements(drivetrain); //This command requires the Drivetrain subsystem.
