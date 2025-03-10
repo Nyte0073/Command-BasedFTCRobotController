@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.gamepad.TriggerReader;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -13,7 +14,10 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.teamcode.Commands.ButtonCommand;
 import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Commands.TriggerCommand;
+import org.firstinspires.ftc.teamcode.Commands.VisionCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.Subsystems.Vision;
+
 import java.util.List;
 
 @TeleOp(name = "Teleop", group = "teamcode")
@@ -29,7 +33,16 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     static GamepadEx gamepadEx;
 
     /**Reader for one of the driver's controller's triggers.*/
-   public static TriggerReader leftReader, rightReader; //Reader classes for reading the trigger inputs from the driver's controller.
+   public static TriggerReader leftReader, rightReader;
+
+   /**Boolean state for whether the robot is close enough to an object on the field to pick up.*/
+   public static boolean stateReady = false;
+
+   /**Robot's vision system.*/
+   HuskyLens huskyLens;
+
+   /**Vision subsystem class for updating the state of the robot based on the output from the HuskyLens.*/
+    Vision vision;
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
            GamepadKeys.Button.A,
@@ -64,6 +77,9 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         Drivetrain drivetrain = new Drivetrain(telemetry, motors, imu, gamepadEx); //Initializing drivetrain.
         DriveCommand driveCommand = new DriveCommand(motors, telemetry, imu, gamepadEx, true, drivetrain); //Setting up drive command.
 
+        huskyLens = hardwareMap.get(HuskyLens.class, "huskyLens"); //Initializing huskyLens.
+        vision = new Vision(huskyLens, telemetry); //Initializing vision.
+
         leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.
         rightReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.RIGHT_TRIGGER);
 
@@ -90,6 +106,10 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
             if(gamepadEx.wasJustPressed(button)) {
                 schedule(new ButtonCommand(gamepadEx, button, telemetry));
             }
+        }
+
+        if(stateReady) { //If the robot is correctly aligned and is in a drivable range to the object, schedule the robot to drive to the piece.
+            schedule(new VisionCommand(vision, VisionCommand.States.IN_RANGE));
         }
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
