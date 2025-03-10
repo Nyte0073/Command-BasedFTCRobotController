@@ -32,8 +32,8 @@ public class Drivetrain extends SubsystemBase {
     private final GamepadEx gamepadEx;
 
     /**The robot's kinematics system.*/
-    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(7.5625, 7.375), new Translation2d(7.5625, 7.375),
-            new Translation2d(7.5625, 7.375), new Translation2d(7.5625, 7.375));
+    public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(7.5625, -7.375), new Translation2d(7.5625, 7.375),
+            new Translation2d(-7.5625, -7.375), new Translation2d(-7.5625, 7.375));
 
     /**The robot's odometry system.*/
     public MecanumDriveOdometry odometry = new MecanumDriveOdometry( // Mecanum Drive odometry. Don't worry about this for now.
