@@ -48,17 +48,9 @@ public class ButtonCommand extends CommandBase {
                 telemetry.addData("DPAD_RIGHT", "was just pressed.");
                 break;
 
-            case A:
-                telemetry.addData("A", "was just pressed, and yaw was reset.");
-                imu.resetYaw();
-                break;
-
-            case B:
-                telemetry.addData("B", "was just pressed.");
-                break;
-
             case X:
-                telemetry.addData("X", "was just pressed.");
+                telemetry.addData("X", "was just pressed and yaw was reset.");
+                imu.resetYaw();
                 break;
 
             case Y:

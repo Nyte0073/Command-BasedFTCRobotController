@@ -43,8 +43,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     static VisionCommand visionCommand;
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
-           GamepadKeys.Button.A,
-           GamepadKeys.Button.B,
            GamepadKeys.Button.X,
            GamepadKeys.Button.Y,
            GamepadKeys.Button.DPAD_DOWN,
