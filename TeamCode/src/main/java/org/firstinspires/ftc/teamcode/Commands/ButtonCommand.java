@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.Commands;
 
-import android.util.Log;
-
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ButtonCommand extends CommandBase {
@@ -19,12 +17,16 @@ public class ButtonCommand extends CommandBase {
     /**The robot's telemetry system.*/
     Telemetry telemetry;
 
+    /**The robot's gyroscope system.*/
+    IMU imu;
+
     /**Constructs a new {@code ButtonCommand} with initialized {@code GamepadEx}, {@code GamepadEx.Button}'s,
      and {@code Telemetry}.*/
-    public ButtonCommand(GamepadEx gamepadEx, GamepadKeys.Button button, Telemetry telemetry) {
+    public ButtonCommand(GamepadEx gamepadEx, GamepadKeys.Button button, Telemetry telemetry, IMU imu) {
         this.gamepadEx = gamepadEx;
         this.button = button;
         this.telemetry = telemetry;
+        this.imu = imu;
     }
 
     @Override
@@ -47,8 +49,8 @@ public class ButtonCommand extends CommandBase {
                 break;
 
             case A:
-                Log.i(FtcRobotControllerActivity.TAG, "A was pressed.");
-                telemetry.addData("A", "was just pressed.");
+                telemetry.addData("A", "was just pressed, and yaw was reset.");
+                imu.resetYaw();
                 break;
 
             case B:

@@ -105,7 +105,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
 
         for(GamepadKeys.Button button : buttons) { //If any button pressed, schedule a new ButtonCommand().
             if(gamepadEx.wasJustPressed(button)) {
-                schedule(new ButtonCommand(gamepadEx, button, telemetry));
+                schedule(new ButtonCommand(gamepadEx, button, telemetry, imu));
             }
         }
 
