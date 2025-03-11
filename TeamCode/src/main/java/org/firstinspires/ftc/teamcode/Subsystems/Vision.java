@@ -32,9 +32,6 @@ public class Vision extends SubsystemBase {
 
     /**Returns whether the Husky Lens sees a piece or not.*/
     public boolean hasBlock() {
-        if(huskyLens.blocks().length > 0) {
-            block = huskyLens.blocks()[0];
-        }
         return huskyLens.blocks().length != 0;
     }
 
@@ -42,6 +39,10 @@ public class Vision extends SubsystemBase {
      * and also updates the state of the robot's proximity to the desired target.*/
     @Override
     public void periodic() {
+        if(huskyLens.blocks().length > 0) {
+            block = huskyLens.blocks()[0];
+        }
+
         try {
             aligned = block.x < 176 && block.x > 169;
             inRange = block.y < 100;
