@@ -30,7 +30,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     static IMU imu;
 
     /**The driver's controller.*/
-    static GamepadEx gamepadEx;
+    static GamepadEx gamepadEx; 
 
     /**Reader for one of the driver's controller's triggers.*/
    public static TriggerReader leftReader, rightReader;

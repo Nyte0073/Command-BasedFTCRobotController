@@ -20,16 +20,16 @@ public class Drivetrain extends SubsystemBase {
     private final Motor frontLeft, frontRight, backLeft, backRight;
 
     /**The robot's gyroscope system.*/
-    public final IMU imu;
+    public final IMU imu; 
 
     /**The robot's telemetry system.*/
-    private final Telemetry telemetry;
+    private final Telemetry telemetry; 
 
     /**A reference to the robot's mecanum drive ability.*/
     public final MecanumDrive mecanumDrive;
 
     /**The driver's controller.*/
-    private final GamepadEx gamepadEx;
+    private final GamepadEx gamepadEx; 
 
     /**The robot's kinematics system.*/
     public MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(7.5625, -7.375), new Translation2d(7.5625, 7.375),
