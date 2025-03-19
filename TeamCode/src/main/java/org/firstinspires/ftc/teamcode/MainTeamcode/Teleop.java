@@ -76,7 +76,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         huskyLens = hardwareMap.get(HuskyLens.class, "huskyLens"); //Initializing huskyLens.
         vision = new Vision(huskyLens, telemetry); //Initializing vision.
 
-        visionCommand = new VisionCommand(vision, VisionCommand.States.NOT_IN_RANGE);
+        visionCommand = new VisionCommand(vision, VisionCommand.States.NOT_IN_RANGE, telemetry);
         vision.setDefaultCommand(visionCommand);
 
         leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.

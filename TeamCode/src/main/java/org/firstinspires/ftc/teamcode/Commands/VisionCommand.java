@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Vision;
 
 public class VisionCommand extends CommandBase {
@@ -11,10 +13,13 @@ public class VisionCommand extends CommandBase {
     /**The state of the robot in terms of position relative to its desired target.*/
     public static States state;
 
+    Telemetry telemetry;
+
     /**Constructs a new {@code VisionCommand()} with an initialized {@code Vision()} and
      * {@code State()}.*/
-    public VisionCommand(Vision vision, States state) {
+    public VisionCommand(Vision vision, States state, Telemetry telemetry) {
         this.vision = vision;
+        this.telemetry = telemetry;
         VisionCommand.state = state;
         addRequirements(vision);
     }
@@ -28,15 +33,19 @@ public class VisionCommand extends CommandBase {
     public void execute() {
        switch(state) {
            case IN_RANGE:
+               telemetry.addData("Robot", "is in range.");
                break;
 
            case NOT_IN_RANGE:
+               telemetry.addData("Robot", "is not in range.");
                break;
 
            case IN_RANGE_BUT_NOT_ALIGNED:
+               telemetry.addData("Robot", "is in range but not aligned.");
                break;
 
            case ALIGNED_BUT_NOT_CLOSE_ENOUGH:
+               telemetry.addData("Robot", "is aligned but not close enough.");
                break;
        }
     }

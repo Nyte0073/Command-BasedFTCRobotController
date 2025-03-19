@@ -39,11 +39,12 @@ public class Vision extends SubsystemBase {
      * and also updates the state of the robot's proximity to the desired target.*/
     @Override
     public void periodic() {
-        if(huskyLens.blocks().length > 0) {
-            block = huskyLens.blocks()[0];
-        }
+//        if(huskyLens.blocks().length > 0) {
+//            block = huskyLens.blocks()[0] == null ? null : huskyLens.blocks()[0];
+//        }
 
         try {
+            assert block != null;
             aligned = block.x < 176 && block.x > 169;
             inRange = block.y < 100;
         } catch (NullPointerException e) {
@@ -62,7 +63,7 @@ public class Vision extends SubsystemBase {
 
         telemetry.addLine("HUSKY LENS DATA");
         telemetry.addData("Husky Lens Block Count", huskyLens.blocks().length);
-        telemetry.addData("Husky Lens First Piece Info", hasBlock() ? huskyLens.blocks()[0].toString() : "HuskyLens doesn't have a piece.");
+//        telemetry.addData("Husky Lens First Piece Info", hasBlock() ? huskyLens.blocks()[0].toString() : "HuskyLens doesn't have a piece.");
         telemetry.addData("Vision State", VisionCommand.getState());
     }
 }
