@@ -15,7 +15,7 @@ is compatible with your robot and its control hub.
 
 The FTC SDK uses Java 8 and a gradle classpath version 7.3.0 for successfully doing project builds, and these versions work the best with Java version 17,
 which is exactly the version of Java that I use with this setup. Your computer won't come with Java 17 downloaded automatically, so you will have to 
-download it externally. Here is a link to a website the that will allow to directly download the Java 17 JDK: https://aka.ms/download-jdk/microsoft-jdk-17.0.14-windows-x64.zip.
+download it externally. Here is a link to a website that will allow you to directly download the Java 17 JDK: https://aka.ms/download-jdk/microsoft-jdk-17.0.14-windows-x64.zip.
 
 That download is for Windows, but if your using any other operating system, use this link and choose the correct ZIP file to download for your operating
 system. And remember, pick from the ones with the x64 installer. Once you have the zip file downloaded, extract it into a folder and then remember the path
