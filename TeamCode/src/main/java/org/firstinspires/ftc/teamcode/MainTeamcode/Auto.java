@@ -80,4 +80,9 @@ public class Auto extends CommandOpMode {
 
         command.schedule();
     }
+
+    @Override
+    public void run() {
+        telemetry.update();
+    }
 }
