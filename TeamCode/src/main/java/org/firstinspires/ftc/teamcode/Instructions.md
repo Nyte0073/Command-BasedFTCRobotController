@@ -18,7 +18,7 @@ which is exactly the version of Java that I use with this setup. Your computer w
 download it externally. Here is a link to a website that will allow you to directly download the Java 17 JDK: https://aka.ms/download-jdk/microsoft-jdk-17.0.14-windows-x64.zip.
 
 That download is for Windows, but if your using any other operating system, use this link and choose the correct ZIP file to download for your operating
-system. And remember, pick from the ones with the x64 installer. Once you have the zip file downloaded, extract it into a folder and then remember the path
+system: https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17. And remember, pick from the ones with the x64 installer. Once you have the zip file downloaded, extract it into a folder and then remember the path
 of the JDK's location because you will need it in a minute.
 
 Once you have the folder extracted, go into and Android Studio and tap on the Settings option (the gear icon), and go to 
