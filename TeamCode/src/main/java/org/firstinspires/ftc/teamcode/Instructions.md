@@ -11,7 +11,7 @@ The FTC SDK built-into this FTC repository uses specific gradle versions, so you
 your gradle settings in some of your Gradle Files located in your Gradle Scripts area to be able to use the right version of the FTC Android Studio that
 is compatible with your robot and its control hub.
 
-## Downloading the correct version of Java
+# Downloading the correct version of Java
 
 The FTC SDK uses Java 8 and a gradle classpath version 7.3.0 for successfully doing project builds, and these versions work the best with Java version 17,
 which is exactly the version of Java that I use with this setup. Your computer won't come with Java 17 downloaded automatically, so you will have to 
@@ -25,7 +25,7 @@ Once you have the folder extracted, go into and Android Studio and tap on the Se
 BUILD, EXECUTION, DEPLOYMENT > BUILD TOOLS > GRADLE, and then in the "Gradle JDK" option, select the path to where you extracted the JDK for Java 17.
 Then, once you have done that, click "Ok".
 
-### Selecting the right gradle version
+# Selecting the right gradle version
 
 Right now, if you go to Gradle Scripts in your project ToolBar area, and you click on build.gradle (Project: FtcRobotController-master), you should that the 
 value of the classpath variable is set to 7.3.0. If the classpath value is not set to that number, then please change it to that number.
@@ -34,7 +34,7 @@ Your classpath variable should look like this:
 
 `classpath 'com.android.tools.build:gradle:7.3.0'`
 
-#### Selecting the right wrapper-properties gradle version
+# Selecting the right wrapper-properties gradle version
 
 Right now, if you go gradle.wrapper-properties in your Gradle Scripts and then check the value of the "distributionUrl" property, then the value of the bin
 gradle version should be 7.4.2. If the value of the property is not 7.4.2, then please change it that number. Your "distributionUrl" property should
