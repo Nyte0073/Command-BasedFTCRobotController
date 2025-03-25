@@ -36,7 +36,7 @@ Your classpath variable should look like this:
 
 # Selecting the right wrapper-properties gradle version
 
-Right now, if you go gradle.wrapper-properties in your Gradle Scripts and then check the value of the "distributionUrl" property, then the value of the bin
+Right now, if you go to the gradle.wrapper-properties in your Gradle Scripts and then check the value of the "distributionUrl" property, then the value of the bin
 gradle version should be 7.4.2. If the value of the property is not 7.4.2, then please change it that number. Your "distributionUrl" property should
 look like this:
 
