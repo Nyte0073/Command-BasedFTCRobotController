@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -45,7 +47,7 @@ public class Drivetrain extends SubsystemBase {
 
     /**Constructs a new {@code Drivetrain()} with built-in {@code Telemetry}, and initialized {@code Motor}'s, {@code IMU}
      * and {@code GamepadEx}.*/
-    public Drivetrain(Telemetry telemetry, Motor[] motors, IMU imu, GamepadEx gamepadEx) { //Initializing motors within drivetrain class itself.
+    public Drivetrain(Telemetry telemetry, @NonNull Motor[] motors, IMU imu, GamepadEx gamepadEx) { //Initializing motors within drivetrain class itself.
         frontLeft = motors[0];
         frontRight = motors[1];
         backLeft = motors[2];
@@ -72,7 +74,7 @@ public class Drivetrain extends SubsystemBase {
     public void drive(boolean fieldOriented) { //Will drive either normally or field oriented depending on the state of fieldOriented.
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         if(fieldOriented) {
-            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), Math.abs(gamepadEx.getLeftY()) <= 0.08 ? 0 : gamepadEx.getLeftY(), -gamepadEx.getRightX(), heading);
+            mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), Math.abs(-gamepadEx.getLeftY()) <= 0.08 ? 0 : -gamepadEx.getLeftY(), gamepadEx.getRightX(), heading);
         } else {
             mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX());
         }

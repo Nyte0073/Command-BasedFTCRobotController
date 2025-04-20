@@ -27,10 +27,10 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     Motor[] motors;
 
     /**The robot's gyroscope system.*/
-    static IMU imu;
+    IMU imu;
 
     /**The driver's controller.*/
-    static GamepadEx gamepadEx; 
+    GamepadEx gamepadEx;
 
     /**Reader for one of the driver's controller's triggers.*/
    public static TriggerReader leftReader, rightReader;
@@ -39,8 +39,8 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
    HuskyLens huskyLens;
 
    /**Vision subsystem class for updating the state of the robot based on the output from the HuskyLens.*/
-    static Vision vision;
-    static VisionCommand visionCommand;
+   Vision vision;
+   VisionCommand visionCommand;
 
    List<GamepadKeys.Button> buttons = List.of( //List of game pad controls, here for referencing in the code.
            GamepadKeys.Button.X,
@@ -54,7 +54,6 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     @Override
     public void initialize() { //This is where you will initialize any variables and set default commands and register subsystems.
         gamepadEx = new GamepadEx(gamepad1);
-
          imu = hardwareMap.get(IMU.class, "imu"); //Use hardwareMap.get() method to initialize IMU.
 
         final IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -82,7 +81,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         leftReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.LEFT_TRIGGER); //Setting up readers for both left and right trigger inputs.
         rightReader = new TriggerReader(gamepadEx, GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        register(drivetrain, vision); //Registering drivetrain subsystem for having its periodic() method called automatically.
+        //register(drivetrain, vision); //Registering drivetrain subsystem for having its periodic() method called automatically.
 
         drivetrain.setDefaultCommand(driveCommand); //Setting the default command for drivetrain.
 
@@ -108,7 +107,7 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
         }
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
-        telemetry.update();
+        //telemetry.update();
 
         sleep(20);
     }

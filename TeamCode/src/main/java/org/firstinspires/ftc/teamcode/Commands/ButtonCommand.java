@@ -58,6 +58,7 @@ public class ButtonCommand extends CommandBase {
                 break;
 
         }
+        telemetry.update();
     }
 
     @Override

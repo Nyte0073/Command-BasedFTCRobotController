@@ -31,6 +31,8 @@ public class TriggerCommand extends CommandBase {
        } else if(rightTriggerPressed) {
             telemetry.addData("Right trigger", "was just pressed.");
        }
+
+       telemetry.update();
     }
 
     @Override
