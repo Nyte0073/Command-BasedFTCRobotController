@@ -55,7 +55,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 
         for(Motor m : drivingMotors) {
             m.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-            m.stopAndResetEncoder();
         }
     }
 
