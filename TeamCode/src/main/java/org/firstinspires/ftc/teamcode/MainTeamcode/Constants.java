@@ -15,6 +15,14 @@ public class Constants {
         public static final String backRightMotor = "back_right";
     }
 
+    public static class SwerveConstants {
+        public static final String frontLeftDriving = "frontLeftDriving",
+        frontRightDriving = "frontRightDriving",
+        backLeftDriving = "backLeftDriving",
+        backRightDriving = "backRightDriving";
+        public static final double vectorScalar = 1.4142135623730950488016887242097;
+    }
+
     public static class ServoConstants {
         /**The name of the robot's claw servo.*/
         public static final String clawServo = "claw";

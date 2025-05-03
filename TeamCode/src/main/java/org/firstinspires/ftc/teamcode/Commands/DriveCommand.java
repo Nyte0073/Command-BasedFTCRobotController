@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -25,6 +24,8 @@ public class DriveCommand extends CommandBase {
     /**The robot's gyroscope system.*/
     IMU imu;
 
+    public static DriveStates driveState = DriveStates.DISABLE_SLOW_MODE;
+
     /**Constructs a new {@code DriveCommand()} with initialized {@code Motor}'s, {@code Telemetry}, {@code IMU} and {@code GamepadEx.} */
     public DriveCommand(Motor[] motors, IMU imu, GamepadEx gamepadEx, boolean fieldOriented, Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -38,15 +39,21 @@ public class DriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.A)) { //If button A was pressed, cut the max speed of the robot in half.
-            drivetrain.mecanumDrive.setMaxSpeed(0.5);
-        }
+        switch(driveState) {
+            case ENABLE_SLOW_MODE:
+                drivetrain.mecanumDrive.setMaxSpeed(0.5);
+                break;
 
-        if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.B)) { //If button B was pressed, increase the max speed of the robot to 1.
-            drivetrain.mecanumDrive.setMaxSpeed(1);
+            case DISABLE_SLOW_MODE:
+                drivetrain.mecanumDrive.setMaxSpeed(1);
+                break;
         }
+        drivetrain.drive(fieldOriented);
+    }
 
-        drivetrain.drive(fieldOriented); //Make the drive either field oriented or not.
+    public enum DriveStates {
+        ENABLE_SLOW_MODE,
+        DISABLE_SLOW_MODE
     }
 
     @Override

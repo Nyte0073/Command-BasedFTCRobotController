@@ -76,7 +76,7 @@ public class Drivetrain extends SubsystemBase {
         if(fieldOriented) {
             mecanumDrive.driveFieldCentric(gamepadEx.getLeftX(), Math.abs(-gamepadEx.getLeftY()) <= 0.08 ? 0 : -gamepadEx.getLeftY(), gamepadEx.getRightX(), heading);
         } else {
-            mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), gamepadEx.getLeftY(), -gamepadEx.getRightX());
+            mecanumDrive.driveRobotCentric(gamepadEx.getLeftX(), -gamepadEx.getLeftY(), gamepadEx.getRightX());
         }
     }
 

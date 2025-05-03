@@ -1,0 +1,13 @@
+
+DriveCommand drive code
+
+ //   if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.A)) { //If button A was pressed, cut the max speed of the robot in half.
+//            drivetrain.mecanumDrive.setMaxSpeed(0.5);
+//        }
+//
+//        if(drivetrain.getGamepadEx().wasJustPressed(GamepadKeys.Button.B)) { //If button B was pressed, increase the max speed of the robot to 1.
+//            drivetrain.mecanumDrive.setMaxSpeed(1);
+//        }
+//
+//        drivetrain.drive(fieldOriented); //Make the drive either field oriented or not.
+

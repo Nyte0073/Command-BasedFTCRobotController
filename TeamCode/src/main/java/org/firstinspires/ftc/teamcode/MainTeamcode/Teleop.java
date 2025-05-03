@@ -54,13 +54,12 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
     @Override
     public void initialize() { //This is where you will initialize any variables and set default commands and register subsystems.
         gamepadEx = new GamepadEx(gamepad1);
-         imu = hardwareMap.get(IMU.class, "imu"); //Use hardwareMap.get() method to initialize IMU.
+        imu = hardwareMap.get(IMU.class, "imu"); //Use hardwareMap.get() method to initialize IMU.
 
         final IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP)); //This is the direction the IMU is facing on the robot. DO NOT change.
 
         imu.initialize(parameters);
-
         sleep(500);
 
         motors = new Motor[]{new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor), //Initializing motors.
@@ -104,6 +103,12 @@ public class Teleop extends CommandOpMode { //Main class for making the robot fu
             if(gamepadEx.wasJustPressed(button)) {
                 schedule(new ButtonCommand(gamepadEx, button, telemetry, imu));
             }
+        }
+
+        if(gamepadEx.wasJustPressed(GamepadKeys.Button.A)) {
+            DriveCommand.driveState = DriveCommand.DriveStates.ENABLE_SLOW_MODE;
+        } else if(gamepadEx.wasJustPressed(GamepadKeys.Button.B)) {
+            DriveCommand.driveState = DriveCommand.DriveStates.DISABLE_SLOW_MODE;
         }
 
         CommandScheduler.getInstance().run(); //Run every scheduled command.
