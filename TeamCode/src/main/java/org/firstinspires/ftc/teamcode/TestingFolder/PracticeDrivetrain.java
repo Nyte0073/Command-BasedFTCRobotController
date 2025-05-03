@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class PracticeDrivetrain extends SubsystemBase {
     private Telemetry telemetry;
-    private Motor frontLeft, backLeft, frontRight, backRight;
+    private final Motor frontLeft, backLeft, frontRight, backRight;
     public MecanumDrive mecanumDrive;
 
     public PracticeDrivetrain(Telemetry telemetry, @NonNull Motor[] motors) {

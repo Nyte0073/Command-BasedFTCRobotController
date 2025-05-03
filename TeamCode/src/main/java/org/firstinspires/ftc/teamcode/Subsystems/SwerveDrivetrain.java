@@ -58,6 +58,12 @@ public class SwerveDrivetrain extends SubsystemBase {
         }
     }
 
+    /**Sets the power of the driving and turning motors and sets the target angle for the turning motors to turn to.
+     * This method uses {@code CompletableFuture.runAsync()} to give the motors in the program time to to get to their set
+     * positions and to accelerate in a another thread, completely separate from the main {@code setSwerveModuleState()} method.
+     * This way, even if the {@code setSwerveModuleState()} method runs another time before the {@code CompletableFuture.runAsync()} method is done finishing,
+     * it won't update the heading of the turning motors or call the {@code runAsync()} method until the boolean in {@code CompletableFuture.runAsync()} has
+     * declared that the method has finished. This way, only one program is updating the motors at a time.*/
     public void setPower(boolean headingReversed, double forwardVector) {
         CompletableFuture.runAsync(() -> {
             for(Motor m : turningMotors) {
