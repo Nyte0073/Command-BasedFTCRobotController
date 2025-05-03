@@ -21,6 +21,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     /**Motors to drive the robot in the right direction of the intended movement vector.*/
     public final Motor[] drivingMotors;
+
     /**Reference to the driver's gamepad controller.*/
     GamepadEx gamepadEx;
 
