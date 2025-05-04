@@ -20,6 +20,8 @@ public class SwerveTeleop extends CommandOpMode {
      * movement vector.*/
     public Motor[] turningMotors, drivingMotors;
 
+    public SwerveDrivetrain swerveDrivetrain;
+
     /**Initializes the {@code GamepadEx} and the {@code Motor} objects in both {@code Motor}
      * arrays. Also initializes the {@code IMU}, a {@code SwerveDrivetrain} subsystem and a
      * {@code SwerveDriveCommand} command to make the robot's hardware components run. This method also
@@ -42,7 +44,7 @@ public class SwerveTeleop extends CommandOpMode {
                 new Motor(hardwareMap, Constants.SwerveConstants.backRightDriving)
         };
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain(telemetry, turningMotors, drivingMotors, gamepadEx, imu);
+        swerveDrivetrain = new SwerveDrivetrain(telemetry, turningMotors, drivingMotors, gamepadEx, imu);
         SwerveDriveCommand swerveDriveCommand = new SwerveDriveCommand(swerveDrivetrain, gamepadEx, imu, false);
         swerveDrivetrain.setDefaultCommand(swerveDriveCommand);
         register(swerveDrivetrain);
@@ -55,6 +57,10 @@ public class SwerveTeleop extends CommandOpMode {
                 m.stopAndResetEncoder();
                 m.setRunMode(Motor.RunMode.PositionControl);
             }
+        }
+
+        if(gamepadEx.wasJustPressed(GamepadKeys.Button.B)) {
+            swerveDrivetrain.resetGyro();
         }
     }
 }

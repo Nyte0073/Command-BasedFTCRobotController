@@ -58,6 +58,10 @@ public class SwerveDrivetrain extends SubsystemBase {
         }
     }
 
+    public void resetGyro() {
+        imu.resetYaw();
+    }
+
     /**Sets the power of the driving and turning motors and sets the target angle for the turning motors to turn to.
      * This method uses {@code CompletableFuture.runAsync()} to give the motors in the program time to to get to their set
      * positions and to accelerate in a another thread, completely separate from the main {@code setSwerveModuleState()} method.
@@ -108,7 +112,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                 double side = gamepadEx.getLeftX();
 
                 double forwardVector = Math.hypot(forward, side) / Constants.SwerveConstants.vectorScalar;
-                double heading = Math.toDegrees(Math.atan2(forward, side)) - 90;
+                double heading = (Math.abs(forward) <= 0.01 && Math.abs(side) <= 0.01) ? 0 : Math.toDegrees(Math.atan2(forward, side)) - 90;
 
                 double normalizedHeading = normalizeHeading(headingDegrees, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingFieldOriented, normalizedHeading);
@@ -134,7 +138,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 double forward = -gamepadEx.getLeftY();
                 double side = gamepadEx.getLeftX();
-                double heading = Math.toDegrees(Math.atan2(forward, side)) - 90;
+                double heading = (Math.abs(forward) <= 0.01 && Math.abs(side) <= 0.01) ? 0 : Math.toDegrees(Math.atan2(forward, side)) - 90;
                 double forwardVector = Math.hypot(forward, side) / Constants.SwerveConstants.vectorScalar;
 
                 double normalizedHeading = normalizeHeading(0, heading);
