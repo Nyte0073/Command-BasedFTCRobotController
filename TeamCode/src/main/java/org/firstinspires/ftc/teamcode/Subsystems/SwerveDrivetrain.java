@@ -119,7 +119,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 for(Motor m : turningMotors) {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeading) / 360) * 1440));
-                    m.set(1);
                 }
 
                 setPower(reversedHeading != 0, forwardVector);
@@ -147,7 +146,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 for(Motor m : turningMotors) {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeading) / 360) * 1440));
-                    m.set(1);
                 }
 
                 setPower(reversedHeading != 0, forwardVector);
