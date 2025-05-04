@@ -112,7 +112,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 double normalizedHeading = normalizeHeading(headingDegrees, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingFieldOriented, normalizedHeading);
-                double reversedHeading = Math.abs(normalizedHeadingWithPreviousHeading) > 180 ? normalizedHeadingWithPreviousHeading + 180 : 0;
+                double totalHeading = previousHeadingFieldOriented + normalizedHeadingWithPreviousHeading;
+
+                double reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingFieldOriented,
+                        (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
 
                 for(Motor m : turningMotors) {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeading) / 360) * 1440));
@@ -121,7 +124,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 setPower(reversedHeading != 0, forwardVector);
 
-                previousHeadingFieldOriented = reversedHeading != 0 ? reversedHeading : normalizedHeading;
+                previousHeadingFieldOriented = reversedHeading != 0 ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
 
             } else {
                 if(!asyncMethodHasFinished.get()) {
@@ -137,7 +140,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 double normalizedHeading = normalizeHeading(0, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingNotFieldOriented, normalizedHeading);
-                double reversedHeading = Math.abs(normalizedHeadingWithPreviousHeading) > 180 ? normalizedHeadingWithPreviousHeading + 180 : 0;
+                double totalHeading = previousHeadingNotFieldOriented + normalizedHeadingWithPreviousHeading;
+
+                double reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingNotFieldOriented,
+                        (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
 
                 for(Motor m : turningMotors) {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeading) / 360) * 1440));
@@ -146,7 +152,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 setPower(reversedHeading != 0, forwardVector);
 
-                previousHeadingNotFieldOriented = reversedHeading != 0 ? reversedHeading : normalizedHeading;
+                previousHeadingNotFieldOriented = reversedHeading != 0 ? previousHeadingNotFieldOriented + reversedHeading : normalizedHeading;
 
             }
     }
