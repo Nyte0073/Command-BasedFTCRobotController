@@ -22,9 +22,6 @@ public class SwerveDrivetrain extends SubsystemBase {
     /**Motors to drive the robot in the right direction of the intended movement vector.*/
     public final Motor[] drivingMotors;
 
-    /**Reference to the driver's gamepad controller.*/
-    GamepadEx gamepadEx;
-
     /**The robot's orientation system, returning the robot's current heading relative to a certain angle that
      * is considered 0 degrees.*/
     IMU imu;
@@ -40,9 +37,8 @@ public class SwerveDrivetrain extends SubsystemBase {
      * This constructor method also stops and resets the encoders of both the turning and driving motors, sets their
      * {@code ZeroPowerBehavior} mode to {@code BRAKE}, and sets the {@code RunMode} of the turning motors to
      * {@code PositionControl} so that those motors will run based on a set distance for them to rotate across.*/
-    public SwerveDrivetrain(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, GamepadEx gamepadEx, IMU imu) {
+    public SwerveDrivetrain(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, IMU imu) {
         this.telemetry = telemetry;
-        this.gamepadEx = gamepadEx;
         this.turningMotors = turningMotors;
         this.drivingMotors = drivingMotors;
         this.imu = imu;
@@ -98,8 +94,12 @@ public class SwerveDrivetrain extends SubsystemBase {
      * This method considers whether you want to drive field oriented or robot oriented, and will calculate motor powers
      * for the driving motors and the set target heading for the turning motors relative to the angle returned by
      * the {@code IMU} system. */
-    public void setSwerveModuleState(boolean fieldOriented) {
-            if(fieldOriented) {
+    public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower) {
+
+        double heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
+                Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
+
+        if(fieldOriented) {
 
                 if(!asyncMethodHasFinished.get()) {
                     return;
@@ -108,11 +108,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                 }
 
                 double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-                double forward = -gamepadEx.getLeftY();
-                double side = gamepadEx.getLeftX();
 
-                double forwardVector = Math.hypot(forward, side) / Constants.SwerveConstants.vectorScalar;
-                double heading = (Math.abs(forward) <= 0.01 && Math.abs(side) <= 0.01) ? 0 : Math.toDegrees(Math.atan2(forward, side)) - 90;
+                double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
 
                 double normalizedHeading = normalizeHeading(headingDegrees, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingFieldOriented, normalizedHeading);
@@ -136,10 +133,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                     asyncMethodHasFinished.set(false);
                 }
 
-                double forward = -gamepadEx.getLeftY();
-                double side = gamepadEx.getLeftX();
-                double heading = (Math.abs(forward) <= 0.01 && Math.abs(side) <= 0.01) ? 0 : Math.toDegrees(Math.atan2(forward, side)) - 90;
-                double forwardVector = Math.hypot(forward, side) / Constants.SwerveConstants.vectorScalar;
+                double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
 
                 double normalizedHeading = normalizeHeading(0, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingNotFieldOriented, normalizedHeading);

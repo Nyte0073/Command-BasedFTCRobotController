@@ -36,7 +36,9 @@ public class SwerveDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-            swerveDrivetrain.setSwerveModuleState(fieldOriented);
+        double forward = -gamepadEx.getLeftY();
+        double side = gamepadEx.getLeftX();
+            swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side);
     }
 
     @Override
