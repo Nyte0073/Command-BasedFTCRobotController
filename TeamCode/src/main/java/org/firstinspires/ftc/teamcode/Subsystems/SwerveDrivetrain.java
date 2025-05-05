@@ -107,15 +107,22 @@ public class SwerveDrivetrain extends SubsystemBase {
                 }
 
                 double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                telemetry.addData("Robot Heading in Degrees", headingDegrees);
 
                 double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
+                telemetry.addData("Forward Vector Motor Power", forwardVector);
 
                 double normalizedHeading = normalizeHeading(headingDegrees, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingFieldOriented, normalizedHeading);
                 double totalHeading = previousHeadingFieldOriented + normalizedHeadingWithPreviousHeading;
 
+                telemetry.addData("Normalized Heading Without Previous Heading", normalizedHeading);
+                telemetry.addData("Normalized Heading with Previous Heading", normalizedHeadingWithPreviousHeading);
+                telemetry.addData("Total Heading", totalHeading);
+
                 double reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingFieldOriented,
                         (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
+                telemetry.addData("Reversed Heading", reversedHeading);
 
                 for(Motor m : turningMotors) {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
@@ -133,10 +140,15 @@ public class SwerveDrivetrain extends SubsystemBase {
                 }
 
                 double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
+                telemetry.addData("Forward Vector Motor Power", forwardVector);
 
                 double normalizedHeading = normalizeHeading(0, heading);
                 double normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingNotFieldOriented, normalizedHeading);
                 double totalHeading = previousHeadingNotFieldOriented + normalizedHeadingWithPreviousHeading;
+
+                telemetry.addData("Normalized Heading Without Previous Heading", normalizedHeading);
+                telemetry.addData("Normalized Heading with Previous Heading", normalizedHeadingWithPreviousHeading);
+                telemetry.addData("Total Heading", totalHeading);
 
                 double reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingNotFieldOriented,
                         (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
@@ -162,7 +174,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addLine("Swerve Module States");
         telemetry.update();
     }
 }
