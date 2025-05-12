@@ -44,7 +44,7 @@ public class SwerveTeleop extends CommandOpMode {
                 new Motor(hardwareMap, Constants.SwerveConstants.backRightDriving)
         };
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        swerveDrivetrain = new SwerveDrivetrain(telemetry, turningMotors, drivingMotors, gamepadEx, imu);
+        swerveDrivetrain = new SwerveDrivetrain(telemetry, turningMotors, drivingMotors, imu);
         SwerveDriveCommand swerveDriveCommand = new SwerveDriveCommand(swerveDrivetrain, gamepadEx, imu, false);
         swerveDrivetrain.setDefaultCommand(swerveDriveCommand);
         register(swerveDrivetrain);
