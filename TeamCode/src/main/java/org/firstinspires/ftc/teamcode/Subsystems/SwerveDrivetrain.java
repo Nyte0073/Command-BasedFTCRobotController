@@ -128,7 +128,9 @@ public class SwerveDrivetrain extends SubsystemBase {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
                 }
 
-                setPower(reversedHeading != 0, forwardVector);
+                boolean headingReversed = Math.abs(totalHeading) > 180;
+
+                setPower(headingReversed, forwardVector);
 
                 previousHeadingFieldOriented = reversedHeading != 0 ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
 
@@ -157,7 +159,9 @@ public class SwerveDrivetrain extends SubsystemBase {
                     m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
                 }
 
-                setPower(reversedHeading != 0, forwardVector);
+                boolean headingReversed = Math.abs(totalHeading) > 180;
+
+                setPower(headingReversed, forwardVector);
 
                 previousHeadingNotFieldOriented = reversedHeading != 0 ? previousHeadingNotFieldOriented + reversedHeading : normalizedHeading;
 
