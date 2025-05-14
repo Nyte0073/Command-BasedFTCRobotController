@@ -124,11 +124,11 @@ public class SwerveDrivetrain extends SubsystemBase {
                         (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
                 telemetry.addData("Reversed Heading", reversedHeading);
 
-                for(Motor m : turningMotors) {
-                    m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
-                }
-
                 boolean headingReversed = Math.abs(totalHeading) > 180;
+
+                for(Motor m : turningMotors) {
+                    m.setTargetPosition((int) Math.round(((headingReversed ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
+                }
 
                 setPower(headingReversed, forwardVector);
 
@@ -155,11 +155,11 @@ public class SwerveDrivetrain extends SubsystemBase {
                 double reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingNotFieldOriented,
                         (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
 
-                for(Motor m : turningMotors) {
-                    m.setTargetPosition((int) Math.round(((reversedHeading != 0 ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
-                }
-
                 boolean headingReversed = Math.abs(totalHeading) > 180;
+
+                for(Motor m : turningMotors) {
+                    m.setTargetPosition((int) Math.round(((headingReversed ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440));
+                }
 
                 setPower(headingReversed, forwardVector);
 
