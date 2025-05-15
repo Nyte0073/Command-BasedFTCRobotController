@@ -132,7 +132,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 setPower(headingReversed, forwardVector);
 
-                previousHeadingFieldOriented = reversedHeading != 0 ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
+                previousHeadingFieldOriented = headingReversed ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
 
             } else {
                 if(!asyncMethodHasFinished.get()) {
@@ -163,7 +163,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 setPower(headingReversed, forwardVector);
 
-                previousHeadingNotFieldOriented = reversedHeading != 0 ? previousHeadingNotFieldOriented + reversedHeading : normalizedHeading;
+                previousHeadingNotFieldOriented = headingReversed ? previousHeadingNotFieldOriented + reversedHeading : normalizedHeading;
 
             }
     }
