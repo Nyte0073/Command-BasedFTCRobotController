@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
 
 import java.util.concurrent.CompletableFuture;
@@ -93,7 +92,7 @@ public class SwerveDrivetrain extends SubsystemBase {
      * This method considers whether you want to drive field oriented or robot oriented, and will calculate motor powers
      * for the driving motors and the set target heading for the turning motors relative to the angle returned by
      * the {@code IMU} system. */
-    public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower) {
+    public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, double headingDegrees) {
 
         double heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
                 Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
@@ -106,7 +105,6 @@ public class SwerveDrivetrain extends SubsystemBase {
                     asyncMethodHasFinished.set(false);
                 }
 
-                double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 telemetry.addData("Robot Heading in Degrees", headingDegrees);
 
                 double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;

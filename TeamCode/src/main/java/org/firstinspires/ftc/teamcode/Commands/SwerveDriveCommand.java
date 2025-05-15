@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.SwerveDrivetrain;
 
 
@@ -38,7 +39,8 @@ public class SwerveDriveCommand extends CommandBase {
     public void execute() {
         double forward = -gamepadEx.getLeftY();
         double side = gamepadEx.getLeftX();
-            swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side);
+        double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side, headingDegrees);
     }
 
     @Override
