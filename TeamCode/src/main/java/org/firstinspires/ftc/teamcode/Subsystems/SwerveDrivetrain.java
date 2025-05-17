@@ -31,7 +31,8 @@ public class SwerveDrivetrain extends SubsystemBase {
      * and that the driving motors have had their {@code forwardVector} power set to them and are driving.*/
     public AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
     asyncRotationMethodHasFinished = new AtomicBoolean(false),
-    asyncResettingRotationHasFinished = new AtomicBoolean(false);
+    asyncResettingRotationHasFinished = new AtomicBoolean(false),
+    rotationWasDone = new AtomicBoolean(false);
 
 
     /**Constructs a new {@code SwerveDrivetrain} with initialized {@code Telemetry}, turning {@code Motor}'s,
@@ -160,6 +161,15 @@ public class SwerveDrivetrain extends SubsystemBase {
             drivingMotors[3].set(headingReversedFLBR ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
 
             asyncRotationMethodHasFinished.set(true);
+            rotationWasDone.set(true);
+        });
+    }
+
+    public void resetWheelHeading() {
+        CompletableFuture.runAsync(() -> {
+
+        }).thenRun(() -> {
+          rotationWasDone.set(false);
         });
     }
 
@@ -187,8 +197,9 @@ public class SwerveDrivetrain extends SubsystemBase {
                     } else {
                         return;
                     }
-                } else {
-                    if(!asyncResettingRotationHasFinished.get()) {
+                } else if(rotationWasDone.get()) {
+                    if(asyncResettingRotationHasFinished.get()) {
+                        resetWheelHeading();
                         return;
                     }
                 }
@@ -234,10 +245,11 @@ public class SwerveDrivetrain extends SubsystemBase {
                     } else {
                         return;
                     }
-                } else {
-                    if(!asyncResettingRotationHasFinished.get()) {
-                        return;
+                } else if(rotationWasDone.get()) {
+                    if (asyncResettingRotationHasFinished.get()) {
+                        resetWheelHeading();
                     }
+                    return;
                 }
 
                 double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
