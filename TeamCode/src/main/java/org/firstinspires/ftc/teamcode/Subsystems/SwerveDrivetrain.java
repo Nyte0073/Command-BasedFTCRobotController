@@ -200,8 +200,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                 } else if(rotationWasDone.get()) {
                     if(asyncResettingRotationHasFinished.get()) {
                         resetWheelHeading();
-                        return;
                     }
+                    return;
                 }
 
                 telemetry.addData("Robot Heading in Degrees", headingDegrees);
