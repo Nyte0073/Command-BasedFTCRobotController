@@ -37,10 +37,15 @@ public class SwerveDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
+        boolean turningLeft = false;
         double forward = -gamepadEx.getLeftY();
         double side = gamepadEx.getLeftX();
+        double rotate = gamepadEx.getRightX();
+        if(rotate != Math.abs(rotate)) {
+            turningLeft = true;
+        }
         double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side, headingDegrees);
+            swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side, headingDegrees, rotate, turningLeft);
     }
 
     @Override

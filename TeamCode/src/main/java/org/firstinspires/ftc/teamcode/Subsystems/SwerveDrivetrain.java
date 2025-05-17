@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -28,7 +29,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     /**Keeps track of whether the heading of the motors have been applied to the turning motors
      * and that the driving motors have had their {@code forwardVector} power set to them and are driving.*/
-    public AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false);
+    public AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
+    asyncRotationMethodHasFinished = new AtomicBoolean(false),
+    asyncResettingRotationHasFinished = new AtomicBoolean(false);
+
 
     /**Constructs a new {@code SwerveDrivetrain} with initialized {@code Telemetry}, turning {@code Motor}'s,
      * driving {@code Motor}'s, {@code GamepadEx} and {@code IMU}.
@@ -88,11 +92,82 @@ public class SwerveDrivetrain extends SubsystemBase {
         });
     }
 
+    /**Rotates the the robot perfectly in a circle by rotating every wheel to angle of 45 degrees in
+     * opposite directions and then powering the motors in opposite powers to produce rotation in either a clockwise
+     * or counterclockwise direction.*/
+    public void completeRotate(boolean turningLeft, double imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
+        if(!asyncRotationMethodHasFinished.get()) {
+            return;
+        } else {
+            asyncRotationMethodHasFinished.set(false);
+        }
+
+        if(!fieldOriented) {
+            imuHeadingInDegrees = 0;
+        }
+
+        double headingFLBR = -45, headingFRBL = 45;
+
+            double normalizedHeadingFLBR = normalizeHeading(imuHeadingInDegrees, headingFLBR);
+            double normalizedHeadingWithPreviousFLBR = normalizeHeading(previousHeadingFieldOriented, normalizedHeadingFLBR);
+            double totalHeadingFLBR = previousHeadingFieldOriented + normalizedHeadingWithPreviousFLBR;
+            double reversedHeadingFLBR = Math.abs(totalHeadingFLBR) > 180 ? normalizeHeading(previousHeadingFieldOriented,
+                    normalizedHeadingFLBR != Math.abs(normalizedHeadingFLBR) ? normalizedHeadingFLBR + 180 : normalizedHeadingFLBR - 180) : 0;
+            boolean headingReversedFLBR = Math.abs(totalHeadingFLBR) > 180;
+
+            double normalizedHeadingFRBL = normalizeHeading(imuHeadingInDegrees, headingFRBL);
+            double normalizedHeadingWithPreviousFRBL = normalizeHeading(previousHeadingFieldOriented, normalizedHeadingFRBL);
+            double totalHeadingFRBL = previousHeadingFieldOriented + normalizedHeadingWithPreviousFLBR;
+            double reversedHeadingFRBL = Math.abs(totalHeadingFRBL) > 180 ? normalizeHeading(previousHeadingFieldOriented,
+                     normalizedHeadingFRBL != Math.abs(normalizedHeadingFRBL) ? normalizedHeadingFRBL + 180 : normalizedHeadingFRBL - 180) : 0;
+            boolean headingReversedFRBL = Math.abs(totalHeadingFRBL) > 180;
+
+            int frontLeftBackRightPosition = (int) Math.round(((headingReversedFLBR ? reversedHeadingFLBR : normalizedHeadingWithPreviousFLBR) / 360) * 1440);
+            int frontRightBackLeftPosition = (int) Math.round(((headingReversedFRBL ? reversedHeadingFRBL : normalizedHeadingWithPreviousFRBL) / 360) * 1440);
+
+            turningMotors[0].setTargetPosition(frontLeftBackRightPosition);
+            turningMotors[1].setTargetPosition(frontRightBackLeftPosition);
+            turningMotors[2].setTargetPosition(frontRightBackLeftPosition);
+            turningMotors[3].setTargetPosition(frontLeftBackRightPosition);
+
+
+            setPowerForCompleteRotate(turningLeft, headingReversedFLBR, headingReversedFRBL, turnVector);
+
+    }
+
+    public void setPowerForCompleteRotate(boolean turningLeft, boolean headingReversedFLBR, boolean headingReversedFRBL, double turningVector) {
+        CompletableFuture.runAsync(() -> {
+            for(Motor m : turningMotors) {
+                m.set(1);
+            }
+
+            Motor motor = turningMotors[0];
+            while(!motor.atTargetPosition()) {
+                try {
+                    Thread.sleep(10);
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            for(Motor m : turningMotors) {
+                m.set(0);
+            }
+        }).thenRun(() -> {
+            drivingMotors[0].set(headingReversedFLBR ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
+            drivingMotors[1].set(headingReversedFRBL ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
+            drivingMotors[2].set(headingReversedFRBL ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
+            drivingMotors[3].set(headingReversedFLBR ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
+
+            asyncRotationMethodHasFinished.set(true);
+        });
+    }
+
     /**Calculates and sets the states of all the turning and driving motors in all 4 swerve modules.
      * This method considers whether you want to drive field oriented or robot oriented, and will calculate motor powers
      * for the driving motors and the set target heading for the turning motors relative to the angle returned by
      * the {@code IMU} system. */
-    public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, double headingDegrees) {
+    public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, double headingDegrees, double turningVector, boolean turningLeft) {
 
         double heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
                 Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
@@ -103,6 +178,17 @@ public class SwerveDrivetrain extends SubsystemBase {
                     return;
                 } else {
                     asyncMethodHasFinished.set(false);
+                }
+
+                if(Math.abs(turningVector) >= 0.05) {
+                    if(asyncRotationMethodHasFinished.get()) {
+                        asyncRotationMethodHasFinished.set(false);
+                        completeRotate(turningLeft, headingDegrees, turningVector, true);
+                    }
+                } else {
+                    if(!asyncResettingRotationHasFinished.get()) {
+                        return;
+                    }
                 }
 
                 telemetry.addData("Robot Heading in Degrees", headingDegrees);
@@ -133,10 +219,21 @@ public class SwerveDrivetrain extends SubsystemBase {
                 previousHeadingFieldOriented = headingReversed ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
 
             } else {
-                if(!asyncMethodHasFinished.get()) {
+                if(asyncMethodHasFinished.get()) {
                     return;
                 } else {
                     asyncMethodHasFinished.set(false);
+                }
+
+                if(Math.abs(turningVector) >= 0.05) {
+                    if(asyncRotationMethodHasFinished.get()) {
+                       asyncRotationMethodHasFinished.set(false);
+                       completeRotate(turningLeft, 0, turningVector, false);
+                    }
+                } else {
+                    if(!asyncResettingRotationHasFinished.get()) {
+                        return;
+                    }
                 }
 
                 double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
