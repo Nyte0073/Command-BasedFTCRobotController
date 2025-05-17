@@ -184,6 +184,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                     if(asyncRotationMethodHasFinished.get()) {
                         asyncRotationMethodHasFinished.set(false);
                         completeRotate(turningLeft, headingDegrees, turningVector, true);
+                    } else {
+                        return;
                     }
                 } else {
                     if(!asyncResettingRotationHasFinished.get()) {
@@ -229,6 +231,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                     if(asyncRotationMethodHasFinished.get()) {
                        asyncRotationMethodHasFinished.set(false);
                        completeRotate(turningLeft, 0, turningVector, false);
+                    } else {
+                        return;
                     }
                 } else {
                     if(!asyncResettingRotationHasFinished.get()) {
