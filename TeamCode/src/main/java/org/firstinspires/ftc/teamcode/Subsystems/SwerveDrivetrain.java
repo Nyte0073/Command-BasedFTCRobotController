@@ -224,7 +224,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
                 if(!asyncMethodHasFinished.get()) {
                     return;
-                } else if(Math.abs(turningVector) >= 0.05) {
+                } else if(Math.abs(turningVector) < 0.05) {
                     asyncMethodHasFinished.set(false);
                 }
 
@@ -273,7 +273,7 @@ public class SwerveDrivetrain extends SubsystemBase {
             } else {
                 if(asyncMethodHasFinished.get()) {
                     return;
-                } else if(Math.abs(turningVector) >= 0.05) {
+                } else if(Math.abs(turningVector) < 0.05) {
                     asyncMethodHasFinished.set(false);
                 }
 
