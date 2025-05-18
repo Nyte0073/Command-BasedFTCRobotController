@@ -32,7 +32,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     public AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
     asyncRotationMethodHasFinished = new AtomicBoolean(false),
     asyncResettingRotationHasFinished = new AtomicBoolean(false),
-    rotationWasDone = new AtomicBoolean(false);
+    rotationWasDone = new AtomicBoolean(false),
+    alreadyRotated = new AtomicBoolean(false);
+    int[] wheelRotationPreviousHeadings = new int[2];
+    boolean[] previousTurningLeftAndReversed = new boolean[3];
 
 
     /**Constructs a new {@code SwerveDrivetrain} with initialized {@code Telemetry}, turning {@code Motor}'s,
@@ -103,9 +106,15 @@ public class SwerveDrivetrain extends SubsystemBase {
             asyncRotationMethodHasFinished.set(false);
         }
 
+        if(alreadyRotated.get()) {
+            setPowerForCompleteRotate(previousTurningLeftAndReversed[0], previousTurningLeftAndReversed[1], previousTurningLeftAndReversed[2], turnVector);
+        }
+
         if(!fieldOriented) {
             imuHeadingInDegrees = 0;
         }
+
+        previousTurningLeftAndReversed[0] = turningLeft;
 
         double headingFLBR = -45, headingFRBL = 45;
 
@@ -116,12 +125,16 @@ public class SwerveDrivetrain extends SubsystemBase {
                     normalizedHeadingFLBR != Math.abs(normalizedHeadingFLBR) ? normalizedHeadingFLBR + 180 : normalizedHeadingFLBR - 180) : 0;
             boolean headingReversedFLBR = Math.abs(totalHeadingFLBR) > 180;
 
+            previousTurningLeftAndReversed[1] = headingReversedFLBR;
+
             double normalizedHeadingFRBL = normalizeHeading(imuHeadingInDegrees, headingFRBL);
             double normalizedHeadingWithPreviousFRBL = normalizeHeading(previousHeadingFieldOriented, normalizedHeadingFRBL);
             double totalHeadingFRBL = previousHeadingFieldOriented + normalizedHeadingWithPreviousFLBR;
             double reversedHeadingFRBL = Math.abs(totalHeadingFRBL) > 180 ? normalizeHeading(previousHeadingFieldOriented,
                      normalizedHeadingFRBL != Math.abs(normalizedHeadingFRBL) ? normalizedHeadingFRBL + 180 : normalizedHeadingFRBL - 180) : 0;
             boolean headingReversedFRBL = Math.abs(totalHeadingFRBL) > 180;
+
+            previousTurningLeftAndReversed[2] = headingReversedFRBL;
 
             int frontLeftBackRightPosition = (int) Math.round(((headingReversedFLBR ? reversedHeadingFLBR : normalizedHeadingWithPreviousFLBR) / 360) * 1440);
             int frontRightBackLeftPosition = (int) Math.round(((headingReversedFRBL ? reversedHeadingFRBL : normalizedHeadingWithPreviousFRBL) / 360) * 1440);
@@ -131,6 +144,8 @@ public class SwerveDrivetrain extends SubsystemBase {
             turningMotors[2].setTargetPosition(frontRightBackLeftPosition);
             turningMotors[3].setTargetPosition(frontLeftBackRightPosition);
 
+            wheelRotationPreviousHeadings[0] =  (frontLeftBackRightPosition / 1440) * 360;
+            wheelRotationPreviousHeadings[1] = (frontRightBackLeftPosition / 1440) * 360;
 
             setPowerForCompleteRotate(turningLeft, headingReversedFLBR, headingReversedFRBL, turnVector);
 
@@ -162,14 +177,37 @@ public class SwerveDrivetrain extends SubsystemBase {
 
             asyncRotationMethodHasFinished.set(true);
             rotationWasDone.set(true);
+            alreadyRotated.set(true);
         });
     }
 
-    public void resetWheelHeading() {
-        CompletableFuture.runAsync(() -> {
+    public void resetWheelHeading(int[] wheelRotationPreviousHeadings) {
+        turningMotors[0].setTargetPosition(-wheelRotationPreviousHeadings[0]);
+        turningMotors[1].setTargetPosition(-wheelRotationPreviousHeadings[1]);
+        turningMotors[2].setTargetPosition(-wheelRotationPreviousHeadings[0]);
+        turningMotors[3].setTargetPosition(-wheelRotationPreviousHeadings[1]);
 
+        CompletableFuture.runAsync(() -> {
+            for(Motor m : turningMotors) {
+                m.set(1);
+            }
+
+            Motor motor = turningMotors[0];
+            while(!motor.atTargetPosition()) {
+                try {
+                    Thread.sleep(10);
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            for(Motor m : turningMotors) {
+                m.set(0);
+            }
         }).thenRun(() -> {
           rotationWasDone.set(false);
+          asyncResettingRotationHasFinished.set(true);
+          alreadyRotated.set(false);
         });
     }
 
@@ -199,7 +237,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                     }
                 } else if(rotationWasDone.get()) {
                     if(asyncResettingRotationHasFinished.get()) {
-                        resetWheelHeading();
+                        asyncResettingRotationHasFinished.set(false);
+                        resetWheelHeading(wheelRotationPreviousHeadings);
                     }
                     return;
                 }
@@ -247,7 +286,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                     }
                 } else if(rotationWasDone.get()) {
                     if (asyncResettingRotationHasFinished.get()) {
-                        resetWheelHeading();
+                        resetWheelHeading(wheelRotationPreviousHeadings);
                     }
                     return;
                 }
