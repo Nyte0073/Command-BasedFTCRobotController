@@ -44,7 +44,7 @@ public class SwerveDriveCommand extends CommandBase {
         if(rotate != Math.abs(rotate)) {
             turningLeft = true;
         }
-        double headingDegrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        int headingDegrees = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             swerveDrivetrain.setSwerveModuleState(fieldOriented, forward, side, headingDegrees, rotate, turningLeft);
     }
 
