@@ -107,7 +107,7 @@ public class SwerveDrivetrain extends SubsystemBase {
         }
 
         if(alreadyRotated.get()) {
-            setPowerForCompleteRotate(previousTurningLeftAndReversed[0], previousTurningLeftAndReversed[1], previousTurningLeftAndReversed[2], turnVector,
+            setPowerForCompleteRotate(previousTurningLeftAndReversed[0], previousTurningLeftAndReversed[1], previousTurningLeftAndReversed[2], Math.abs(turnVector),
                     new int[] {}, false);
         }
 
@@ -148,7 +148,7 @@ public class SwerveDrivetrain extends SubsystemBase {
             wheelRotationPreviousHeadings[0] = frontLeftBackRightPosition;
             wheelRotationPreviousHeadings[1] = frontRightBackLeftPosition;
 
-            setPowerForCompleteRotate(turningLeft, headingReversedFLBR, headingReversedFRBL, turnVector,
+            setPowerForCompleteRotate(turningLeft, headingReversedFLBR, headingReversedFRBL, Math.abs(turnVector),
                     new int[] {frontLeftBackRightPosition, frontRightBackLeftPosition}, true);
 
     }
