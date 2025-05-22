@@ -199,7 +199,10 @@ public class SwerveDrivetrain extends SubsystemBase {
         });
     }
 
-    /**Resets the heading of all the wheels to the previous heading of*/
+    /**Resets the heading of all the wheels to the previous heading of the motors when they weren't being rotated by the {@code completeRotate()}
+     * method. This <br> ensures that whatever {@code previousHeadingFieldOriented}/{@code previousHeadingNotFieldOriented} <br> was for a heading calculation,
+     * the wheels get that heading back and return to that heading. This method will rotate the wheels in a counterclockwise or clockwise direction,
+     * depending on if the heading needed to be taken to get back to the original heading is positive or negative.*/
     public void resetWheelHeading(int[] wheelRotationPreviousHeadings) {
         turningMotors[0].setTargetPosition(-wheelRotationPreviousHeadings[0]);
         turningMotors[1].setTargetPosition(-wheelRotationPreviousHeadings[1]);
