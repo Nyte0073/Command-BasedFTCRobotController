@@ -25,16 +25,24 @@ public class SwerveDrivetrain extends SubsystemBase {
      * is considered 0 degrees.*/
     IMU imu;
 
+    /**The previous headings of the field-oriented/robot-oriented turning motors.*/
     int previousHeadingFieldOriented = 0, previousHeadingNotFieldOriented = 0;
 
-    /**Keeps track of whether the heading of the motors have been applied to the turning motors
-     * and that the driving motors have had their {@code forwardVector} power set to them and are driving.*/
+    /**Boolean states to keep track of whether the robot has completed certain states of rotation or needs to before
+     * updating the driving state of the turning and driving motors again.*/
     public AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
     asyncRotationMethodHasFinished = new AtomicBoolean(false),
     asyncResettingRotationHasFinished = new AtomicBoolean(false),
     rotationWasDone = new AtomicBoolean(false),
     alreadyRotated = new AtomicBoolean(false);
+
+    /**The previous rotation of the turning motors stored in an array to allow the turning motors to reverse their heading
+     * by heading back in the opposite direction but with the same magnitude of the previous heading.*/
     int[] wheelRotationPreviousHeadings = new int[2];
+
+    /**Keeps track of the previous states of the {@code turningLeft}, {@code headingReversedFRBR} and {@code headingReversedFRBL} booleans.
+     * That way, if the robot is already rotated and the robot wants to rotate again, then it will rotate using the previous states from this array,
+     * to keep the robot rotating in the same way if the user holds the right {@code Gamepad} joystick.*/
     boolean[] previousTurningLeftAndReversed = new boolean[3];
 
 
@@ -60,6 +68,7 @@ public class SwerveDrivetrain extends SubsystemBase {
         }
     }
 
+    /**Resets the IMU orientation.*/
     public void resetGyro() {
         imu.resetYaw();
     }
@@ -153,6 +162,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     }
 
+    /**Sets the power to the turning/driving motors for when the {@code completeRotate()} method finishes applying the new target positions
+     * to the turning motors. This method will either make the turning motors spin clockwise or counter clockwise depending on if the heading applied to them
+     * is negative or not. Also depending on if certain headings are reversed due to angles being greater than 180, it will apply negative or positive power
+     * to the driving motors depending on the direction the robot wants to rotate in and if the headings of the driving motors if the headings of the driving motors are reversed.*/
     public void setPowerForCompleteRotate(boolean turningLeft, boolean headingReversedFLBR, boolean headingReversedFRBL, double turningVector, int[] targetPositions, boolean goToPosition) {
         CompletableFuture.runAsync(() -> {
             if(goToPosition) {
@@ -186,6 +199,7 @@ public class SwerveDrivetrain extends SubsystemBase {
         });
     }
 
+    /**Resets the heading of all the wheels to the previous heading of*/
     public void resetWheelHeading(int[] wheelRotationPreviousHeadings) {
         turningMotors[0].setTargetPosition(-wheelRotationPreviousHeadings[0]);
         turningMotors[1].setTargetPosition(-wheelRotationPreviousHeadings[1]);
