@@ -20,6 +20,8 @@ public class SwerveTeleop extends CommandOpMode {
      * movement vector.*/
     public Motor[] turningMotors, drivingMotors;
 
+    /**Implementation of the robot's swerve drivetrain. This object represents all the four wheels of the robot, their headings, heading states, and
+     * booleans for when certain methods running the Swerve Drivetrain haven't/have completed their tasks.*/
     public SwerveDrivetrain swerveDrivetrain;
 
     /**Initializes the {@code GamepadEx} and the {@code Motor} objects in both {@code Motor}
@@ -27,7 +29,9 @@ public class SwerveTeleop extends CommandOpMode {
      * {@code SwerveDriveCommand} command to make the robot's hardware components run. This method also
      * registers the {@code SwerveDrivetrain} subsystem's {@code periodic()} method to be run every cycle, thus
      * all the information regarding the subsystem's functionality will be updated and can be viewed using the subsystem's
-     * {@code Telemetry}.*/
+     * {@code Telemetry}. This method also sets the 'default command' of {@code SwerveDrivetrain} to the {@code execute()} method
+     * in the {@code swerveDriveCommand} object, that way, the {@code setSwerveModuleState()} method is always called no matter what, which
+     * is what you want to be able to drive the robot around anytime to any place, over any distance.*/
     @Override
     public void initialize() {
          gamepadEx = new GamepadEx(gamepad1);
@@ -50,6 +54,10 @@ public class SwerveTeleop extends CommandOpMode {
         register(swerveDrivetrain);
     }
 
+    /**Runs the {@code SwerveTeleop} class. When {@code SwerveTeleop} calls this method, it will check if the button 'A' or 'B' was pressed on the
+     * {@code gamepadEx} controller, and if 'A' was pressed, then it will reset the encoders of the turning motors and reset their mode to PositionControl, so that
+     * the turning motors only go to a certain distance. If the human driver presses 'B' though, the 'yaw' angle of the IMU system built into the robot will eb reset,
+     * so the robot will think that its orientation that it's currently in is 0 degrees, instead of what it was before.*/
     @Override
     public void run() {
         if(gamepadEx.wasJustPressed(GamepadKeys.Button.A)) {
