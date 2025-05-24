@@ -43,7 +43,7 @@ public class SwerveDrive extends Swerve {
 
     private boolean previousTurningLeft = false, fieldOriented;
 
-    private int[] previousTargetPositions = {0, 0, 0, 0};
+    private final int[] previousTargetPositions = {0, 0, 0, 0};
 
     private final GamepadEx gamepadEx;
 
