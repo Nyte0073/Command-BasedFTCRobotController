@@ -13,20 +13,14 @@ import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
 
 @TeleOp(name = "PracticeFile", group = "teamcode")
 public class PracticeFile extends CommandOpMode {
-    PracticeDrivetrain drivetrain;
-    Motor[] motors = new Motor[]{
-            new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor),
-            new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)};
+
     @Override
     public void initialize() {
-        drivetrain = new PracticeDrivetrain(telemetry, motors);
-        register(drivetrain);
+
     }
 
     @Override
     public void run() {
-        telemetry.update();
+
     }
 }

@@ -2,24 +2,35 @@ package org.firstinspires.ftc.teamcode.MainTeamcode;
 
 public class Constants {
     public static class MotorConstants {
-        /**The name of the robot's front-left motor.*/
+        /**Front-left mecanum drive motor/swerve turning motor..*/
         public static final String frontLeftMotor = "front_left";
 
-        /**The name of the robot's front-right motor.*/
+        /**Front-right mecanum drive motor/swerve turning motor.*/
         public static final String frontRightMotor = "front_right";
 
-        /**The name of the robot's back-left motor.*/
+        /**Back-left mecanum drive motor/swerve turning motor..*/
         public static final String backLeftMotor = "back_left";
 
-        /**The name of the robot's back-right motor.*/
+        /**Back-right mecanum drive motor/swerve turning motor.*/
         public static final String backRightMotor = "back_right";
     }
 
     public static class SwerveConstants {
+
+        /**Front-left swerve driving motor.*/
         public static final String frontLeftDriving = "frontLeftDriving",
+
+        /**Front-right swerve driving motor.*/
         frontRightDriving = "frontRightDriving",
+
+        /**Back-left swerve driving motor.*/
         backLeftDriving = "backLeftDriving",
+
+        /**Back-right swerve driving motor.*/
         backRightDriving = "backRightDriving";
+
+        /**Constant for normalizing {@code forwardVector} motor powers so they can only go to a
+         * maximum absolute value of 1.*/
         public static final double vectorScalar = 1.4142135623730950488016887242097;
     }
 
