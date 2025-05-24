@@ -9,7 +9,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Swerve;
 
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,26 +20,40 @@ public class SwerveDrive extends Swerve {
 
     private final IMU imu;
 
-    int previousHeadingFieldOriented = 0, previousHeadingNotFieldOriented = 0;
-
     private final AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
             asyncRotationMethodHasFinished = new AtomicBoolean(false),
             asyncResettingRotationHasFinished = new AtomicBoolean(false),
             rotationWasDone = new AtomicBoolean(false),
             alreadyRotated = new AtomicBoolean(false);
 
-    private final int[] wheelRotationPreviousHeadings = new int[2];
+    private final AtomicBoolean[] wheelsHaveRotated = new AtomicBoolean[] {
+            new AtomicBoolean(false),
+            new AtomicBoolean(false),
+            new AtomicBoolean(false),
+            new AtomicBoolean(false)
+    };
 
-    private final boolean[] previousTurningLeftAndReversed = new boolean[3];
+    private final int[] individualWheelHeadings = {0, 0, 0, 0};
+
+    private final int[] individualTargetPositions = new int[4];
+
+    private final boolean[] headingsReversed = new boolean[4];
+
+    private int previousTurningVector = 0;
+
+    private boolean previousTurningLeft = false, fieldOriented;
+
+    private int[] previousTargetPositions = {0, 0, 0, 0};
 
     private final GamepadEx gamepadEx;
 
-    public SwerveDrive(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, IMU imu, GamepadEx gamepadEx) {
+    public SwerveDrive(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, IMU imu, GamepadEx gamepadEx, boolean fieldOriented) {
         this.telemetry = telemetry;
         this.turningMotors = turningMotors;
         this.drivingMotors = drivingMotors;
         this.imu = imu;
         this.gamepadEx = gamepadEx;
+        this.fieldOriented = fieldOriented;
 
         for(Motor m : turningMotors) {
             m.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -61,7 +74,7 @@ public class SwerveDrive extends Swerve {
         if(fieldOriented) {
             applyFieldOrientedSwerve(heading, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
         } else {
-            applyRobotOrientedSwerve(heading, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
+            applyRobotOrientedSwerve(heading, forwardPower, sidePower, turningVector, turningLeft);
         }
     }
 
@@ -82,7 +95,7 @@ public class SwerveDrive extends Swerve {
         } else if(rotationWasDone.get()) {
             if(asyncResettingRotationHasFinished.get()) {
                 asyncResettingRotationHasFinished.set(false);
-                resetWheelHeading(wheelRotationPreviousHeadings);
+                resetWheelHeading();
             }
             return;
         }
@@ -90,36 +103,49 @@ public class SwerveDrive extends Swerve {
         double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
 
         int normalizedHeading = normalizeHeading(headingInDegrees, heading);
-        int normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingFieldOriented, normalizedHeading);
-        int totalHeading = previousHeadingFieldOriented + normalizedHeadingWithPreviousHeading;
 
-        int reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingFieldOriented,
-                (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
+        int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], normalizedHeading, 0);
+        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, normalizedHeading, individualWheelHeadings[0]);
 
-        boolean headingReversed = Math.abs(totalHeading) > 180;
-        int targetPosition = ((headingReversed ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440;
-        boolean targetHeadingIsNegative = targetPosition < 0;
+        int totalHeadingFrontRight = calculateTotalHeading(individualWheelHeadings[1], normalizedHeading, 1);
+        int reversedHeadingFrontRight =  calculateReverseHeading(totalHeadingFrontRight, normalizedHeading, individualWheelHeadings[1]);
 
-        updateTelemetry(telemetry, new HashMap<String, Object>() {{
-            put("Robot Heading In Degrees", headingInDegrees);
-            put("Forward Vector Motor Power", forwardVector);
-            put("Normalized Heading Without Previous Heading", normalizedHeading);
-            put("Normalized Heading With Previous Heading", normalizedHeadingWithPreviousHeading);
-            put("Total Heading", totalHeading);
-            put("Reversed Heading", reversedHeading);
-        }});
+        int totalHeadingBackLeft = calculateTotalHeading(individualWheelHeadings[2], normalizedHeading, 2);
+        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, normalizedHeading, individualWheelHeadings[2]);
 
-        for(Motor m : turningMotors) {
-            m.setTargetPosition(targetPosition);
-        }
+        int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
+        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
-        setPower(headingReversed, forwardVector, targetHeadingIsNegative);
+        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
+        headingsReversed[1] = reversedHeadingFrontRight != 2000;
+        headingsReversed[2] = reversedHeadingBackLeft != 2000;
+        headingsReversed[3] = reversedHeadingBackRight != 2000;
 
-        previousHeadingFieldOriented = headingReversed ? previousHeadingFieldOriented + reversedHeading : normalizedHeading;
+        individualTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
+        individualTargetPositions[2] = headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2];
+        individualTargetPositions[3] = headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3];
 
+        turningMotors[0].setTargetPosition(individualTargetPositions[0]);
+        turningMotors[1].setTargetPosition(individualTargetPositions[1]);
+        turningMotors[2].setTargetPosition(individualTargetPositions[2]);
+        turningMotors[3].setTargetPosition(individualTargetPositions[3]);
+
+       setPower(headingsReversed, forwardVector);
     }
 
-    public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
+    public int calculateTotalHeading(int currentHeading, int targetHeading, int wheelNumber) {
+        int normalizedHeadingForWheel = normalizeHeading(currentHeading, targetHeading);
+        individualTargetPositions[wheelNumber] = normalizedHeadingForWheel;
+        return currentHeading + normalizedHeadingForWheel;
+    }
+
+    public int calculateReverseHeading(int totalHeading, int normalizedHeading, int wheelHeading) {
+        return Math.abs(totalHeading) > 180 ? normalizeHeading(wheelHeading,
+                normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180) : 2000;
+    }
+
+    public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
         if(asyncMethodHasFinished.get()) {
             return;
         } else if(Math.abs(turningVector) < 0.05) {
@@ -135,7 +161,7 @@ public class SwerveDrive extends Swerve {
             }
         } else if(rotationWasDone.get()) {
             if (asyncResettingRotationHasFinished.get()) {
-                resetWheelHeading(wheelRotationPreviousHeadings);
+                resetWheelHeading();
             }
             return;
         }
@@ -143,32 +169,35 @@ public class SwerveDrive extends Swerve {
         double forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
 
         int normalizedHeading = normalizeHeading(0, heading);
-        int normalizedHeadingWithPreviousHeading = normalizeHeading(previousHeadingNotFieldOriented, normalizedHeading);
-        int totalHeading = previousHeadingNotFieldOriented + normalizedHeadingWithPreviousHeading;
 
-        int reversedHeading = Math.abs(totalHeading) > 180 ? normalizeHeading(previousHeadingNotFieldOriented,
-                (normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180)) : 0;
+        int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], normalizedHeading, 0);
+        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, normalizedHeading, individualWheelHeadings[0]);
 
-        boolean headingReversed = Math.abs(totalHeading) > 180;
-        int targetPosition = ((headingReversed ? reversedHeading : normalizedHeadingWithPreviousHeading) / 360) * 1440;
-        boolean targetHeadingIsNegative = targetPosition < 0;
+        int totalHeadingFrontRight = calculateTotalHeading(individualWheelHeadings[1], normalizedHeading, 1);
+        int reversedHeadingFrontRight =  calculateReverseHeading(totalHeadingFrontRight, normalizedHeading, individualWheelHeadings[1]);
 
-        updateTelemetry(telemetry, new HashMap<String, Object>() {{
-            put("Robot Heading In Degrees", headingInDegrees);
-            put("Forward Vector Motor Power", forwardVector);
-            put("Normalized Heading Without Previous Heading", normalizedHeading);
-            put("Normalized Heading With Previous Heading", normalizedHeadingWithPreviousHeading);
-            put("Total Heading", totalHeading);
-            put("Reversed Heading", reversedHeading);
-        }});
+        int totalHeadingBackLeft = calculateTotalHeading(individualWheelHeadings[2], normalizedHeading, 2);
+        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, normalizedHeading, individualWheelHeadings[2]);
 
-        for(Motor m : turningMotors) {
-            m.setTargetPosition(targetPosition);
-        }
+        int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
+        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
-        setPower(headingReversed, forwardVector, targetHeadingIsNegative);
+        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
+        headingsReversed[1] = reversedHeadingFrontRight != 2000;
+        headingsReversed[2] = reversedHeadingBackLeft != 2000;
+        headingsReversed[3] = reversedHeadingBackRight != 2000;
 
-        previousHeadingNotFieldOriented = headingReversed ? previousHeadingNotFieldOriented + reversedHeading : normalizedHeading;
+        individualTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
+        individualTargetPositions[2] = headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2];
+        individualTargetPositions[3] = headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3];
+
+        turningMotors[0].setTargetPosition(individualTargetPositions[0]);
+        turningMotors[1].setTargetPosition(individualTargetPositions[1]);
+        turningMotors[2].setTargetPosition(individualTargetPositions[2]);
+        turningMotors[3].setTargetPosition(individualTargetPositions[3]);
+
+        setPower(headingsReversed, forwardVector);
     }
 
     @Override
@@ -182,19 +211,13 @@ public class SwerveDrive extends Swerve {
         }
     }
 
+    /**Resets the heading of all the turning motors to the previous value of */
     @Override
-    public void resetWheelHeading(int[] previousWheelHeadings) {
+    public void resetWheelHeading() {
 
-        turningMotors[0].setTargetPosition(-wheelRotationPreviousHeadings[0]);
-        turningMotors[1].setTargetPosition(-wheelRotationPreviousHeadings[1]);
-        turningMotors[2].setTargetPosition(-wheelRotationPreviousHeadings[0]);
-        turningMotors[3].setTargetPosition(-wheelRotationPreviousHeadings[1]);
+
 
         CompletableFuture.runAsync(() -> {
-            turningMotors[0].set(-wheelRotationPreviousHeadings[0] < 0 ? -1 : 1);
-            turningMotors[1].set(-wheelRotationPreviousHeadings[1] < 0 ? -1 : 1);
-            turningMotors[2].set(-wheelRotationPreviousHeadings[0] < 0 ? -1 : 1);
-            turningMotors[3].set(-wheelRotationPreviousHeadings[1] < 0 ? -1 : 1);
 
             Motor motor = turningMotors[0];
             while(!motor.atTargetPosition()) {
@@ -215,6 +238,8 @@ public class SwerveDrive extends Swerve {
         });
     }
 
+    /**Calculates the angle and the state of whether the turning motors' heading need to be reversed or not to allow the robot
+     * to rotate completely on the spot.*/
     @Override
     public void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
         if(!asyncRotationMethodHasFinished.get()) {
@@ -224,83 +249,85 @@ public class SwerveDrive extends Swerve {
         }
 
         if(alreadyRotated.get()) {
-            setPowerForCompleteRotate(previousTurningLeftAndReversed[0], previousTurningLeftAndReversed[1], previousTurningLeftAndReversed[2], Math.abs(turnVector),
-                    new int[] {}, false);
+            setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, previousTargetPositions, false);
         }
 
-        if(!fieldOriented) {
-            imuHeadingInDegrees = 0;
-        }
-
-        previousTurningLeftAndReversed[0] = turningLeft;
+        previousTurningLeft = turningLeft;
 
         int headingFLBR = -45, headingFRBL = 45;
 
-        int normalizedHeadingFLBR = normalizeHeading(imuHeadingInDegrees, headingFLBR);
-        int normalizedHeadingWithPreviousFLBR = normalizeHeading(previousHeadingFieldOriented, normalizedHeadingFLBR);
-        int totalHeadingFLBR = previousHeadingFieldOriented + normalizedHeadingWithPreviousFLBR;
-        int reversedHeadingFLBR = Math.abs(totalHeadingFLBR) > 180 ? normalizeHeading(previousHeadingFieldOriented,
-                normalizedHeadingFLBR != Math.abs(normalizedHeadingFLBR) ? normalizedHeadingFLBR + 180 : normalizedHeadingFLBR - 180) : 0;
-        boolean headingReversedFLBR = Math.abs(totalHeadingFLBR) > 180;
+        int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], headingFLBR, 0);
+        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, headingFLBR, individualWheelHeadings[0]);
 
-        previousTurningLeftAndReversed[1] = headingReversedFLBR;
+        int totalHeadingFrontRight = calculateTotalHeading(individualWheelHeadings[1], headingFRBL, 1);
+        int reversedHeadingFrontRight = calculateReverseHeading(totalHeadingFrontRight, headingFRBL, individualWheelHeadings[1]);
 
-        int normalizedHeadingFRBL = normalizeHeading(imuHeadingInDegrees, headingFRBL);
-        int normalizedHeadingWithPreviousFRBL = normalizeHeading(previousHeadingFieldOriented, normalizedHeadingFRBL);
-        int totalHeadingFRBL = previousHeadingFieldOriented + normalizedHeadingWithPreviousFLBR;
-        int reversedHeadingFRBL = Math.abs(totalHeadingFRBL) > 180 ? normalizeHeading(previousHeadingFieldOriented,
-                normalizedHeadingFRBL != Math.abs(normalizedHeadingFRBL) ? normalizedHeadingFRBL + 180 : normalizedHeadingFRBL - 180) : 0;
-        boolean headingReversedFRBL = Math.abs(totalHeadingFRBL) > 180;
+        int totalHeadingBackLeft = calculateTotalHeading(individualWheelHeadings[2], headingFLBR, 2);
+        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, headingFLBR, individualWheelHeadings[2]);
 
-        previousTurningLeftAndReversed[2] = headingReversedFRBL;
+        int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], headingFRBL, 3);
+        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, headingFRBL, individualWheelHeadings[3]);
 
-        int frontLeftBackRightPosition = ((headingReversedFLBR ? reversedHeadingFLBR : normalizedHeadingWithPreviousFLBR) / 360) * 1440;
-        int frontRightBackLeftPosition = ((headingReversedFRBL ? reversedHeadingFRBL : normalizedHeadingWithPreviousFRBL) / 360) * 1440;
+        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
+        headingsReversed[1] = reversedHeadingFrontRight != 2000;
+        headingsReversed[2] = reversedHeadingBackLeft != 2000;
+        headingsReversed[3] = reversedHeadingBackRight != 2000;
 
-        turningMotors[0].setTargetPosition(frontLeftBackRightPosition);
-        turningMotors[1].setTargetPosition(frontRightBackLeftPosition);
-        turningMotors[2].setTargetPosition(frontRightBackLeftPosition);
-        turningMotors[3].setTargetPosition(frontLeftBackRightPosition);
+        previousTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
+        previousTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
+        previousTargetPositions[2] = headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2];
+        previousTargetPositions[3] = headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3];
 
-        wheelRotationPreviousHeadings[0] = frontLeftBackRightPosition;
-        wheelRotationPreviousHeadings[1] = frontRightBackLeftPosition;
-
-        setPowerForCompleteRotate(turningLeft, headingReversedFLBR, headingReversedFRBL, Math.abs(turnVector),
-                new int[] {frontLeftBackRightPosition, frontRightBackLeftPosition}, true);
+        setPowerForCompleteRotate(turningLeft, headingsReversed, turnVector, new int[] {
+                headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0],
+                headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1],
+                headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2],
+                headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3]
+        }, true);
     }
 
+    /**Normalizes the angular difference between the current heading and the target heading, so that the robot takes the shortest angular distance
+     * to get to point of where the angular distance wants to take the robot in terms of degrees on a Cartesian plane.*/
     @Override
     public int normalizeHeading(int currentPosition, int targetPosition) {
         return (targetPosition - currentPosition + 540) % 360 - 180;
     }
 
+    /**Sets the power of driving/turning motors for when the robot is rotating completely. This method works asynchronously so that it won't
+     * interrupt any other method by taking time to complete its tasks. Depending on if the turning motors' headings need to be reversed if their
+     * targeted heading is beyond an absolute value of 180 degrees, this method will reverse their headings to ensure they are facing the right angle
+     * just in the opposite direction.*/
     @Override
-    public void setPowerForCompleteRotate(boolean turningLeft, boolean headingReversedFLBR, boolean headingReversedFRBL, double turningVector, int[] targetPositions, boolean goToPosition) {
+    public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition) {
         CompletableFuture.runAsync(() -> {
             if(goToPosition) {
-                turningMotors[0].set(targetPositions[0] < 0 ? -1 : 1);
-                turningMotors[1].set(targetPositions[1] < 0 ? -1 : 1);
-                turningMotors[2].set(targetPositions[0] < 0 ? -1 : 1);
-                turningMotors[3].set(targetPositions[1] < 0 ? -1 : 1);
+                turningMotors[0].setTargetPosition(targetPositions[0]);
+                turningMotors[1].setTargetPosition(targetPositions[1]);
+                turningMotors[2].setTargetPosition(targetPositions[2]);
+                turningMotors[3].setTargetPosition(targetPositions[3]);
 
-                Motor motor = turningMotors[0];
-                while (!motor.atTargetPosition()) {
+                setPowerToIndividualWheel(0, headingsReversed[0]);
+                setPowerToIndividualWheel(1, headingsReversed[1]);
+                setPowerToIndividualWheel(2, headingsReversed[2]);
+                setPowerToIndividualWheel(3, headingsReversed[3]);
+
+                while(!allWheelsHaveRotatedToPosition()) {
                     try {
                         Thread.sleep(10);
-                    } catch (Exception e) {
+                    } catch(Exception e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-
-            for(Motor m : turningMotors) {
-                m.set(0);
-            }
         }).thenRun(() -> {
-            drivingMotors[0].set(headingReversedFLBR ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
-            drivingMotors[1].set(headingReversedFRBL ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
-            drivingMotors[2].set(headingReversedFRBL ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
-            drivingMotors[3].set(headingReversedFLBR ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
+            drivingMotors[0].set(headingsReversed[0] ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
+            drivingMotors[1].set(headingsReversed[1] ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
+            drivingMotors[2].set(headingsReversed[2] ? (turningLeft ? turningVector : -turningVector) : (turningLeft ? -turningVector : turningVector));
+            drivingMotors[3].set(headingsReversed[3] ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
+
+            for(AtomicBoolean b : wheelsHaveRotated) {
+                b.set(false);
+            }
 
             asyncRotationMethodHasFinished.set(true);
             rotationWasDone.set(true);
@@ -309,47 +336,85 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public boolean[] getRobotBooleans() {
-        return previousTurningLeftAndReversed;
+    public boolean getTurningLeft() {
+        return previousTurningLeft;
     }
 
     @Override
-    public void setPower(boolean headingReversed, double forwardVector, boolean targetHeadingIsNegative) {
-        CompletableFuture.runAsync(() -> {
-            for(Motor m : turningMotors) {
-                m.set(targetHeadingIsNegative ? -1 : 1);
-            }
+    public boolean getFieldOriented() {
+        return fieldOriented;
+    }
 
-            Motor motor = turningMotors[0];
-            while(!motor.atTargetPosition()) {
+    /**Sets the power for the turn/drive motors for when the robot is just plainly driving and not completely rotating.
+     * This method works asynchronously so that any other program in the class won't get interrupted by it taking time to complete its
+     * tasks.*/
+    @Override
+    public void setPower(boolean[] headingsReversed,  double forwardVector) {
+        CompletableFuture.runAsync(() -> {
+
+            setPowerToIndividualWheel(0, headingsReversed[0]);
+            setPowerToIndividualWheel(1, headingsReversed[1]);
+            setPowerToIndividualWheel(2, headingsReversed[2]);
+            setPowerToIndividualWheel(3, headingsReversed[3]);
+
+            while(!allWheelsHaveRotatedToPosition()) {
                 try {
                     Thread.sleep(10);
                 } catch(Exception e) {
                     throw new RuntimeException(e);
                 }
             }
-
-            for(Motor m : turningMotors) {
-                m.set(0);
-            }
         }).thenRun(() -> {
-            for(Motor m : drivingMotors) {
-                m.set(headingReversed ? -forwardVector : forwardVector);
+            for(int i = 0; i < turningMotors.length; i++) {
+                drivingMotors[i].set(headingsReversed[i] ? -forwardVector : forwardVector);
+            }
+
+            for(AtomicBoolean b : wheelsHaveRotated) {
+                b.set(false);
             }
             asyncMethodHasFinished.set(true);
         });
     }
 
+    public boolean allWheelsHaveRotatedToPosition() {
+        return wheelsHaveRotated[0].get() &&
+                wheelsHaveRotated[1].get() &&
+                wheelsHaveRotated[2].get() &&
+                wheelsHaveRotated[3].get();
+    }
+
+    public void setPowerToIndividualWheel(int wheelNumber, boolean headingIsNegative) {
+        CompletableFuture.runAsync(() -> {
+            turningMotors[wheelNumber].set(headingIsNegative ? -1 : 1);
+            while(!turningMotors[0].atTargetPosition()) {
+                try {
+                    Thread.sleep(10);
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            turningMotors[wheelNumber].set(0);
+        }).thenRun(() -> wheelsHaveRotated[wheelNumber].set(true));
+    }
+
+    /**Returns an array containing the forward and side user joystick input, detailing
+     * what direction and at what speed the robot should travel at.
+     *
+     * @return The forward/side power information inputted by the user.*/
     @Override
     public double[] getRobotDoubles() {
         return new double[] {-gamepadEx.getLeftY(), gamepadEx.getLeftX()};
     }
 
+    /**Returns the IMU heading of the robot in degrees.
+     *
+     * @return heading - the robot's orientation (in degrees).*/
     @Override
     public int getHeadingInDegrees() {
         return (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
     }
 
+    /**Updates telemetry with updated information about the Swerve drivetrain.*/
     @Override
     public void periodic() {
         telemetry.update();

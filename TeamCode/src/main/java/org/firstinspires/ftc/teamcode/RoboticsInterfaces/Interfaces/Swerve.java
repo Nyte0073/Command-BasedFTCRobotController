@@ -28,8 +28,8 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
         turningVector = getRobotDoubles()[2];
         headingInDegrees = getHeadingInDegrees();
 
-        fieldOriented = getRobotBooleans()[0];
-        turningLeft = getRobotBooleans()[1];
+        fieldOriented = getFieldOriented();
+        turningLeft = getTurningLeft();
 
         setSwerveModuleState(fieldOriented, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
     }
@@ -45,19 +45,21 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
 
     public abstract void stopMotors();
 
-    public abstract void resetWheelHeading(int[] previousWheelHeadings);
+    public abstract void resetWheelHeading();
 
     public abstract void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented);
 
-    public abstract void setPowerForCompleteRotate(boolean turningLeft, boolean headingReversedFLBR, boolean headingReversedFRBL, double turningVector, int[] targetPositions, boolean goToPosition);
+    public abstract void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition);
 
     public abstract int normalizeHeading(int currentPosition, int targetPosition);
 
-    public abstract boolean[] getRobotBooleans();
+    public abstract boolean getFieldOriented();
+
+    public abstract boolean getTurningLeft();
 
     public abstract double[] getRobotDoubles();
 
     public abstract int getHeadingInDegrees();
 
-    public abstract void setPower(boolean headingReversed, double forwardVector, boolean targetHeadingIsNegative);
+    public abstract void setPower(boolean[] headingsReversed, double forwardVector);
 }
