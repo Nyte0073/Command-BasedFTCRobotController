@@ -210,17 +210,35 @@ public class SwerveDrive extends Swerve {
             m.set(0);
         }
     }
-
-    /**Resets the heading of all the turning motors to the previous value of */
     @Override
     public void resetWheelHeading() {
+        int botHeading = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
+        int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], botHeading, 0);
+        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, botHeading, individualWheelHeadings[0]);
 
+        int totalHeadingFrontRight = calculateTotalHeading(individualWheelHeadings[1], botHeading, 1);
+        int reversedHeadingFrontRight = calculateReverseHeading(totalHeadingFrontRight, botHeading, individualWheelHeadings[1]);
+
+        int totalHeadingBackLeft = calculateTotalHeading(individualWheelHeadings[2], botHeading, 2);
+        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, botHeading, individualWheelHeadings[2]);
+
+        int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], botHeading, 3);
+        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, botHeading, individualWheelHeadings[3]);
+
+        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
+        headingsReversed[1] = reversedHeadingFrontRight != 2000;
+        headingsReversed[2] = reversedHeadingBackLeft != 2000;
+        headingsReversed[3] = reversedHeadingBackRight != 2000;
 
         CompletableFuture.runAsync(() -> {
 
-            Motor motor = turningMotors[0];
-            while(!motor.atTargetPosition()) {
+            turningMotors[0].setTargetPosition(headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0]);
+            turningMotors[1].setTargetPosition(headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1]);
+            turningMotors[2].setTargetPosition(headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2]);
+            turningMotors[3].setTargetPosition(headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3]);
+
+            while(!allWheelsHaveRotatedToPosition()) {
                 try {
                     Thread.sleep(10);
                 } catch(Exception e) {
@@ -232,14 +250,15 @@ public class SwerveDrive extends Swerve {
                 m.set(0);
             }
         }).thenRun(() -> {
+            for(AtomicBoolean b : wheelsHaveRotated) {
+                b.set(false);
+            }
+
             rotationWasDone.set(false);
             asyncResettingRotationHasFinished.set(true);
             alreadyRotated.set(false);
         });
     }
-
-    /**Calculates the angle and the state of whether the turning motors' heading need to be reversed or not to allow the robot
-     * to rotate completely on the spot.*/
     @Override
     public void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
         if(!asyncRotationMethodHasFinished.get()) {
@@ -286,17 +305,11 @@ public class SwerveDrive extends Swerve {
         }, true);
     }
 
-    /**Normalizes the angular difference between the current heading and the target heading, so that the robot takes the shortest angular distance
-     * to get to point of where the angular distance wants to take the robot in terms of degrees on a Cartesian plane.*/
     @Override
     public int normalizeHeading(int currentPosition, int targetPosition) {
         return (targetPosition - currentPosition + 540) % 360 - 180;
     }
 
-    /**Sets the power of driving/turning motors for when the robot is rotating completely. This method works asynchronously so that it won't
-     * interrupt any other method by taking time to complete its tasks. Depending on if the turning motors' headings need to be reversed if their
-     * targeted heading is beyond an absolute value of 180 degrees, this method will reverse their headings to ensure they are facing the right angle
-     * just in the opposite direction.*/
     @Override
     public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition) {
         CompletableFuture.runAsync(() -> {
@@ -345,9 +358,6 @@ public class SwerveDrive extends Swerve {
         return fieldOriented;
     }
 
-    /**Sets the power for the turn/drive motors for when the robot is just plainly driving and not completely rotating.
-     * This method works asynchronously so that any other program in the class won't get interrupted by it taking time to complete its
-     * tasks.*/
     @Override
     public void setPower(boolean[] headingsReversed,  double forwardVector) {
         CompletableFuture.runAsync(() -> {
@@ -397,24 +407,16 @@ public class SwerveDrive extends Swerve {
         }).thenRun(() -> wheelsHaveRotated[wheelNumber].set(true));
     }
 
-    /**Returns an array containing the forward and side user joystick input, detailing
-     * what direction and at what speed the robot should travel at.
-     *
-     * @return The forward/side power information inputted by the user.*/
     @Override
     public double[] getRobotDoubles() {
-        return new double[] {-gamepadEx.getLeftY(), gamepadEx.getLeftX()};
+        return new double[] {-gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX()};
     }
 
-    /**Returns the IMU heading of the robot in degrees.
-     *
-     * @return heading - the robot's orientation (in degrees).*/
     @Override
     public int getHeadingInDegrees() {
         return (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
     }
 
-    /**Updates telemetry with updated information about the Swerve drivetrain.*/
     @Override
     public void periodic() {
         telemetry.update();
