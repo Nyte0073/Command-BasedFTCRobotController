@@ -116,10 +116,10 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
-        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
-        headingsReversed[1] = reversedHeadingFrontRight != 2000;
-        headingsReversed[2] = reversedHeadingBackLeft != 2000;
-        headingsReversed[3] = reversedHeadingBackRight != 2000;
+        headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         individualTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
         individualTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
@@ -142,7 +142,7 @@ public class SwerveDrive extends Swerve {
 
     public int calculateReverseHeading(int totalHeading, int normalizedHeading, int wheelHeading) {
         return Math.abs(totalHeading) > 180 ? normalizeHeading(wheelHeading,
-                normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180) : 2000;
+                normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180) : Constants.SwerveConstants.NO_REVERSAL;
     }
 
     public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
@@ -182,10 +182,10 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
-        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
-        headingsReversed[1] = reversedHeadingFrontRight != 2000;
-        headingsReversed[2] = reversedHeadingBackLeft != 2000;
-        headingsReversed[3] = reversedHeadingBackRight != 2000;
+        headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         individualTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
         individualTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
@@ -212,7 +212,7 @@ public class SwerveDrive extends Swerve {
     }
     @Override
     public void resetWheelHeading() {
-        int botHeading = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        int botHeading = getHeadingInDegrees();
 
         int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], botHeading, 0);
         int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, botHeading, individualWheelHeadings[0]);
@@ -226,10 +226,10 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], botHeading, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, botHeading, individualWheelHeadings[3]);
 
-        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
-        headingsReversed[1] = reversedHeadingFrontRight != 2000;
-        headingsReversed[2] = reversedHeadingBackLeft != 2000;
-        headingsReversed[3] = reversedHeadingBackRight != 2000;
+        headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         CompletableFuture.runAsync(() -> {
 
@@ -287,10 +287,10 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], headingFRBL, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, headingFRBL, individualWheelHeadings[3]);
 
-        headingsReversed[0] = reversedHeadingFrontLeft != 2000;
-        headingsReversed[1] = reversedHeadingFrontRight != 2000;
-        headingsReversed[2] = reversedHeadingBackLeft != 2000;
-        headingsReversed[3] = reversedHeadingBackRight != 2000;
+        headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
+        headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         previousTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
         previousTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
