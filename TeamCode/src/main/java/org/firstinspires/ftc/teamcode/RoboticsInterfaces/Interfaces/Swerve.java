@@ -7,6 +7,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.Map;
 
+/**Class containing all abstract methods and functionality to produce a fully functioning field-oriented or robot-oriented swerve
+ * drivetrain for FTC. When extending this class, you will have to implement multiple abstract methods to give your swerve drive the
+ functionality you want, and depending on how you want your swerve drive to function, you could also create your own methods alongside the methods
+ given to you by this class, to help make things cleaner and more organized.*/
 public abstract class Swerve extends SubsystemBase implements Driveable {
 
     /**Forward joystick input.*/
@@ -45,13 +49,15 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
      * human driver.*/
     @Override
     public void drive() {
-        forwardPower = getRobotDoubles()[0];
-        sidePower = getRobotDoubles()[1];
-        turningVector = getRobotDoubles()[2];
-        headingInDegrees = getHeadingInDegrees();
+        RobotVector robotVector = getRobotVector();
 
-        fieldOriented = getFieldOriented();
-        turningLeft = getTurningLeft();
+        forwardPower = robotVector.forwardPower;
+        sidePower = robotVector.sidePower;
+        turningVector = robotVector.turningVector;
+        headingInDegrees = robotVector.imuHeadingInDegrees;
+
+        fieldOriented = robotVector.fieldOriented;
+        turningLeft = robotVector.turningLeft;
 
         setSwerveModuleState(fieldOriented, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
     }
@@ -90,20 +96,11 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
     public abstract void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition);
 
     /**Normalizes the difference between the target heading and current heading of the robot, so that it can take the shortest angle relative to its
-     * current heading to get to the point on the Cartesian plane that the current heading points in the direction of.*/
+     * current heading to get to the point on the Cartesian plane that the target heading points in the direction of.*/
     public abstract int normalizeHeading(int currentPosition, int targetPosition);
 
-    /**Returns whether the robot will drive field-oriented or robot-oriented.*/
-    public abstract boolean getFieldOriented();
-
-    /**Returns whether the robot will be rotating left or right, on the spot.*/
-    public abstract boolean getTurningLeft();
-
-    /**Returns the forward power, side power, and rotational power user inputs for the robot.*/
-    public abstract double[] getRobotDoubles();
-
-    /**Returns the IMU orientation of the robot, in degrees.*/
-    public abstract int getHeadingInDegrees();
+    /**Returns the RobotVector (user input information) about the robot.*/
+    public abstract RobotVector getRobotVector();
 
     /**Sets the power of the turning and driving wheels of the robot when driving normally at a certain angle.*/
     public abstract void setPower(boolean[] headingsReversed, double forwardVector);

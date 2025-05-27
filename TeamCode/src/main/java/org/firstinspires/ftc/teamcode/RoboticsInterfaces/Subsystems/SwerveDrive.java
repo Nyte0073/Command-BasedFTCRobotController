@@ -7,25 +7,42 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
+import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.RobotVector;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Swerve;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**Class containing code for developing a functional field-oriented/robot-oriented swerve drivetrain. This class will calculate all the math
+ * used for making the swerve drive either drive or rotate, */
 public class SwerveDrive extends Swerve {
 
+    /**Robot's information system for updating the driver with information
+     *  about the swerve drivetrain and its current functionality.*/
     Telemetry telemetry;
 
-    private final Motor[] turningMotors, drivingMotors;
+    /**Array containing references to the swerve drive's turning motors.*/
+    private final Motor[] turningMotors,
+    /**Array containing references to the swerve drive's driving motors.*/
+            drivingMotors;
 
+    /**Robot's orientation system for returning the angle that the robot is currently facing.*/
     private final IMU imu;
 
+    /**Whether the robot's setPower() method has completed yet.*/
     private final AtomicBoolean asyncMethodHasFinished = new AtomicBoolean(false),
+    /**Whether the robot's {@code completeRotate()} and {@code setPowerForCompleteRotate()} methods have
+     * finished yet.*/
             asyncRotationMethodHasFinished = new AtomicBoolean(false),
+    /**Whether the robot's {@code resetWheelHeading()} method has completed yet.*/
             asyncResettingRotationHasFinished = new AtomicBoolean(false),
+    /**Whether the robot underwent an on-the-spot rotation or not without getting its wheel headings reset yet.*/
             rotationWasDone = new AtomicBoolean(false),
+    /**Whether the robot has done a rotation on the spot and does not to have new calculations done to undergo rotation
+     * again.*/
             alreadyRotated = new AtomicBoolean(false);
 
+    /**Booleans states for keeping track of if all the wheels have rotated to their respective given headings.*/
     private final AtomicBoolean[] wheelsHaveRotated = new AtomicBoolean[] {
             new AtomicBoolean(false),
             new AtomicBoolean(false),
@@ -33,20 +50,35 @@ public class SwerveDrive extends Swerve {
             new AtomicBoolean(false)
     };
 
+    /**Array containing the individual headings of every single turning motor.*/
     private final int[] individualWheelHeadings = {0, 0, 0, 0};
 
+    /**Array containing the individual target angles of every single turning motor.*/
     private final int[] individualTargetPositions = new int[4];
 
+    /**Array containing the boolean states of if any wheel has their individual heading reversed due to their total heading
+     * being greater than 180 degrees.*/
     private final boolean[] headingsReversed = new boolean[4];
 
+    /**The previous turning vector from when the robot rotated last.*/
     private int previousTurningVector = 0;
 
-    private boolean previousTurningLeft = false, fieldOriented;
+    /**Boolean state of whether the robot was turning left the last time it rotated.*/
+    private boolean previousTurningLeft = false;
 
+    /**Boolean state of whether the robot will drive field-oriented or not.*/
+    private final boolean fieldOriented;
+
+    /**Array containing the previous target positions of every single turning motor from when the robot rotated last.*/
     private final int[] previousTargetPositions = {0, 0, 0, 0};
 
+    /**Reference to the human driver's Xbox Controller for controlling the robot.*/
     private final GamepadEx gamepadEx;
 
+    /**Constructs a new {@code SwerveDrive()} with initialized {@code Telemetry}, turning {@code Motor}'s, driving {@code Motor}'s,
+     * {@code IMU}, {@code GamepadEx} and boolean state for whether the robot will drive field-oriented or robot-oriented.
+     * This method also sets the {@code ZeroPowerBehavior} of the turning and driving motors to {@code BRAKE} when the motors have their power
+     * set to 0, and also resets the encoders of the turning {@code Motor}'s.*/
     public SwerveDrive(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, IMU imu, GamepadEx gamepadEx, boolean fieldOriented) {
         this.telemetry = telemetry;
         this.turningMotors = turningMotors;
@@ -78,6 +110,8 @@ public class SwerveDrive extends Swerve {
         }
     }
 
+    /**Drives the robot's swerve drive in a field-oriented way, that way when the human driver makes the robot drive forward, no matter the
+     * robot's orientation, forward will be always be straight ahead.*/
     public void applyFieldOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
         if(!asyncMethodHasFinished.get()) {
             return;
@@ -134,12 +168,16 @@ public class SwerveDrive extends Swerve {
        setPower(headingsReversed, forwardVector);
     }
 
+    /**Calculates and returns the total heading of a specific turning motor, which is the sum of the turning motor's current heading
+     * and calculated normalized heading based on its desired target heading.*/
     public int calculateTotalHeading(int currentHeading, int targetHeading, int wheelNumber) {
         int normalizedHeadingForWheel = normalizeHeading(currentHeading, targetHeading);
         individualTargetPositions[wheelNumber] = normalizedHeadingForWheel;
         return currentHeading + normalizedHeadingForWheel;
     }
 
+    /**Calculates and returns a specific reversed heading for a specified turning motor. If the heading of the moto doesn't
+     * need to be reversed, then this method will return the value of the {@code NO_REVERSAL} variable from the {@code Constants.Swerve}*/
     public int calculateReverseHeading(int totalHeading, int normalizedHeading, int wheelHeading) {
         return Math.abs(totalHeading) > 180 ? normalizeHeading(wheelHeading,
                 normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180) : Constants.SwerveConstants.NO_REVERSAL;
@@ -212,7 +250,7 @@ public class SwerveDrive extends Swerve {
     }
     @Override
     public void resetWheelHeading() {
-        int botHeading = getHeadingInDegrees();
+        int botHeading = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
         int totalHeadingFrontLeft = calculateTotalHeading(individualWheelHeadings[0], botHeading, 0);
         int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, botHeading, individualWheelHeadings[0]);
@@ -349,16 +387,6 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public boolean getTurningLeft() {
-        return previousTurningLeft;
-    }
-
-    @Override
-    public boolean getFieldOriented() {
-        return fieldOriented;
-    }
-
-    @Override
     public void setPower(boolean[] headingsReversed,  double forwardVector) {
         CompletableFuture.runAsync(() -> {
 
@@ -386,6 +414,7 @@ public class SwerveDrive extends Swerve {
         });
     }
 
+    /**Returns whether all of the turning motors have rotated to their desired target position.*/
     public boolean allWheelsHaveRotatedToPosition() {
         return wheelsHaveRotated[0].get() &&
                 wheelsHaveRotated[1].get() &&
@@ -393,6 +422,10 @@ public class SwerveDrive extends Swerve {
                 wheelsHaveRotated[3].get();
     }
 
+    /**Sets the motor power to a specific individual turning wheel, specified by the {@code wheelNumber} parameter for array indexing.
+     * This method also finds the index in the {@code wheelsHaveRotated} array that contains the boolean state for whether the wheel has rotated
+     * to its desired position or not and sets it to true when the wheel has completed that task. This method runs asynchronously so that it won't
+     * interrupt any other swerve drivetrain-related programs from running in the background.*/
     public void setPowerToIndividualWheel(int wheelNumber, boolean headingIsNegative) {
         CompletableFuture.runAsync(() -> {
             turningMotors[wheelNumber].set(headingIsNegative ? -1 : 1);
@@ -408,13 +441,9 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public double[] getRobotDoubles() {
-        return new double[] {-gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX()};
-    }
-
-    @Override
-    public int getHeadingInDegrees() {
-        return (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+    public RobotVector getRobotVector() {
+        return new RobotVector((int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)),
+                -gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX(), fieldOriented, gamepadEx.getRightX() != Math.abs(gamepadEx.getRightX()));
     }
 
     @Override
