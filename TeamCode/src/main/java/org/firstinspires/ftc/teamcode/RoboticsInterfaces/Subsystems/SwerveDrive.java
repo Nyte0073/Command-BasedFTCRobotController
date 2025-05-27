@@ -240,6 +240,10 @@ public class SwerveDrive extends Swerve {
 
     @Override
     public void stopMotors() {
+        if(!asyncMethodHasFinished.get() || !asyncRotationMethodHasFinished.get() || !asyncResettingRotationHasFinished.get()) {
+            return;
+        }
+
         for(Motor m : turningMotors) {
             m.set(0);
         }
