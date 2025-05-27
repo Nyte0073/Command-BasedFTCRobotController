@@ -34,6 +34,7 @@ public class SwerveDriveCommand extends CommandBase {
     public void execute() {
         if(gamepadEx.wasJustPressed(GamepadKeys.Button.A)) {
             swerveDrive.resetGyro(imu);
+            swerveDrive.stop();
         } else if(gamepadEx.wasJustPressed(GamepadKeys.Button.B)) {
             swerveDrive.stop();
         } else {
