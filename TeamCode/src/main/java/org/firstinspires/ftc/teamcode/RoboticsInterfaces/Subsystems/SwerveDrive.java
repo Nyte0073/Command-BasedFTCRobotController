@@ -75,6 +75,10 @@ public class SwerveDrive extends Swerve {
     /**Reference to the human driver's Xbox Controller for controlling the robot.*/
     private final GamepadEx gamepadEx;
 
+    /**Boolean state for keeping track of when it is safe to call the {@code stopMotors()} method.*/
+    public static boolean stopMotorsIsRunning = false,
+    swerveModuleStateStopped = false;
+
     /**Constructs a new {@code SwerveDrive()} with initialized {@code Telemetry}, turning {@code Motor}'s, driving {@code Motor}'s,
      * {@code IMU}, {@code GamepadEx} and boolean state for whether the robot will drive field-oriented or robot-oriented.
      * This method also sets the {@code ZeroPowerBehavior} of the turning and driving motors to {@code BRAKE} when the motors have their power
@@ -100,6 +104,14 @@ public class SwerveDrive extends Swerve {
 
     @Override
     public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
+        if(stopMotorsIsRunning) {
+            if(!swerveModuleStateStopped) {
+                swerveModuleStateStopped = true;
+                return;
+            }
+            stop();
+        }
+
         int heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
                 (int) Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
 
@@ -113,6 +125,11 @@ public class SwerveDrive extends Swerve {
     /**Drives the robot's swerve drive in a field-oriented way, that way when the human driver makes the robot drive forward, no matter the
      * robot's orientation, forward will be always be straight ahead.*/
     public void applyFieldOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
+        if(stopMotorsIsRunning) {
+           stopMotors();
+           return;
+        }
+
         if(!asyncMethodHasFinished.get()) {
             return;
         } else if(Math.abs(turningVector) < 0.05) {
@@ -165,7 +182,12 @@ public class SwerveDrive extends Swerve {
         turningMotors[2].setTargetPosition(individualTargetPositions[2]);
         turningMotors[3].setTargetPosition(individualTargetPositions[3]);
 
-       setPower(headingsReversed, forwardVector);
+        individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+
+        setPower(headingsReversed, forwardVector);
     }
 
     /**Calculates and returns the total heading of a specific turning motor, which is the sum of the turning motor's current heading
@@ -235,15 +257,16 @@ public class SwerveDrive extends Swerve {
         turningMotors[2].setTargetPosition(individualTargetPositions[2]);
         turningMotors[3].setTargetPosition(individualTargetPositions[3]);
 
+        individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+
         setPower(headingsReversed, forwardVector);
     }
 
     @Override
     public void stopMotors() {
-        if(!asyncMethodHasFinished.get() || !asyncRotationMethodHasFinished.get() || !asyncResettingRotationHasFinished.get()) {
-            return;
-        }
-
         for(Motor m : turningMotors) {
             m.set(0);
         }
@@ -310,7 +333,7 @@ public class SwerveDrive extends Swerve {
         }
 
         if(alreadyRotated.get()) {
-            setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, previousTargetPositions, false);
+            setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, new int[] {}, false);
         }
 
         previousTurningLeft = turningLeft;
