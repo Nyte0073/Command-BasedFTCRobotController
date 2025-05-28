@@ -76,8 +76,7 @@ public class SwerveDrive extends Swerve {
     private final GamepadEx gamepadEx;
 
     /**Boolean state for keeping track of when it is safe to call the {@code stopMotors()} method.*/
-    public static boolean stopMotorsIsRunning = false,
-    swerveModuleStateStopped = false;
+    public static boolean stopMotorsIsRunning = false;
 
     /**Constructs a new {@code SwerveDrive()} with initialized {@code Telemetry}, turning {@code Motor}'s, driving {@code Motor}'s,
      * {@code IMU}, {@code GamepadEx} and boolean state for whether the robot will drive field-oriented or robot-oriented.
@@ -105,10 +104,6 @@ public class SwerveDrive extends Swerve {
     @Override
     public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
         if(stopMotorsIsRunning) {
-            if(!swerveModuleStateStopped) {
-                swerveModuleStateStopped = true;
-                return;
-            }
             stop();
         }
 
@@ -125,10 +120,6 @@ public class SwerveDrive extends Swerve {
     /**Drives the robot's swerve drive in a field-oriented way, that way when the human driver makes the robot drive forward, no matter the
      * robot's orientation, forward will be always be straight ahead.*/
     public void applyFieldOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
-        if(stopMotorsIsRunning) {
-           stopMotors();
-           return;
-        }
 
         if(!asyncMethodHasFinished.get()) {
             return;

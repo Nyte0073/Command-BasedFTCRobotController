@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.SwerveDrive;
 
-import java.util.concurrent.CompletableFuture;
-
 public class SwerveDriveCommand extends CommandBase {
     /**Reference to the robot swerve drivetrain - access to all four wheels and to methods that can control the
      * wheels to perform different depending on the user input on what the robot should do.*/
