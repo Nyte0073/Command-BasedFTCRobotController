@@ -27,7 +27,7 @@ public class SwerveTeleop extends CommandOpMode {
         };
         GamepadEx gamepadEx = new GamepadEx(gamepad1);
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        SwerveDrive swerveDrive = new SwerveDrive(telemetry, turningMotors, drivingMotors, imu, gamepadEx);
+        SwerveDrive swerveDrive = new SwerveDrive(telemetry, turningMotors, drivingMotors, imu, gamepadEx, true);
         SwerveDriveCommand swerveDriveCommand = new SwerveDriveCommand(swerveDrive, gamepadEx, imu);
         swerveDrive.setDefaultCommand(swerveDriveCommand);
         register(swerveDrive);

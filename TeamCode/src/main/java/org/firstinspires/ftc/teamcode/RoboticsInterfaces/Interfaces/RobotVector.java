@@ -38,5 +38,27 @@ public class RobotVector {
         return Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
     }
 
+    public double getForwardPower() {
+        return forwardPower;
+    }
 
+    public double getSidePower() {
+        return sidePower;
+    }
+
+    public double getTurningVector() {
+        return turningVector;
+    }
+
+    public int getImuHeadingInDegrees() {
+        return imuHeadingInDegrees;
+    }
+
+    public boolean getFieldOriented() {
+        return fieldOriented;
+    }
+
+    public boolean getTurningLeft() {
+        return turningLeft;
+    }
 }
