@@ -23,7 +23,7 @@ public abstract class Holonomic extends SubsystemBase implements Driveable {
 
     @Override
     public void resetGyro(IMU imu) {
-
+        imu.resetYaw();
     }
 
     @Override
