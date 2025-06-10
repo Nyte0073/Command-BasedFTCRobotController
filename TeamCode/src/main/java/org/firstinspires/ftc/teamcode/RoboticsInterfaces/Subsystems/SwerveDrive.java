@@ -190,7 +190,8 @@ public class SwerveDrive extends Swerve {
     }
 
     /**Calculates and returns a specific reversed heading for a specified turning motor. If the heading of the moto doesn't
-     * need to be reversed, then this method will return the value of the {@code NO_REVERSAL} variable from the {@code Constants.Swerve}*/
+     * need to be reversed, then this method will return the value of the {@code NO_REVERSAL} variable from the {@code Constants.SwerveConstants}
+     * class.*/
     public int calculateReverseHeading(int totalHeading, int normalizedHeading, int wheelHeading) {
         return Math.abs(totalHeading) > 180 ? normalizeHeading(wheelHeading,
                 normalizedHeading != Math.abs(normalizedHeading) ? normalizedHeading + 180 : normalizedHeading - 180) : Constants.SwerveConstants.NO_REVERSAL;
