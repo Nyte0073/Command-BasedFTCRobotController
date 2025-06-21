@@ -104,7 +104,7 @@ public class SwerveDrive extends Swerve {
 
     @Override
     public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
-        if(stopMotorsIsRunning) {
+        if(stopMotorsIsRunning) { //If this boolean is true, stop motors completely.
             stop();
             return;
         }
@@ -112,7 +112,7 @@ public class SwerveDrive extends Swerve {
         int heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
                 (int) Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
 
-        if(fieldOriented) {
+        if(fieldOriented) { //If the robot wants to drive field-oriented, drive field-oriented. Otherwise, not.
             applyFieldOrientedSwerve(heading, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
         } else {
             applyRobotOrientedSwerve(heading, forwardPower, sidePower, turningVector, turningLeft);
@@ -123,12 +123,19 @@ public class SwerveDrive extends Swerve {
      * robot's orientation, forward will be always be straight ahead.*/
     public void applyFieldOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
 
+        /*If the asynchronous method controlling the robot's regular drive isn't set to true, that means the robot hasn't finished driving in way that it wants
+        * to yet and the program won't proceed. If set true, then the program can proceed.*/
         if(!asyncMethodHasFinished.get()) {
             return;
         } else if(Math.abs(turningVector) < 0.05) {
             asyncMethodHasFinished.set(false);
         }
 
+        /*If the complete rotating vector movement is greater than or equal to a value of 0.05, then that means the human driver wants the robot
+        * to make a rotation on the spot left or right and this program will proceed. If not (and a complete robot rotation was done without being reset), then the robot
+        * will reset the heading of the wheels to the current heading of the robot and then will make the program return.
+        *
+        * Else, the rest of the driving down under will run to make the robot drive regularly.*/
         if(Math.abs(turningVector) >= 0.05) {
             if(asyncRotationMethodHasFinished.get()) {
                 asyncRotationMethodHasFinished.set(false);
@@ -160,6 +167,8 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
+        /*If the heading of a certain wheel on the robot has been reversed to reach the desired target angle, then a boolean corresponding to the wheel in the boolean
+        * array 'headingsReversed' wil be set to true. Else, that boolean will be set false, and so forth will occur again and again for the other wheels.*/
         headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
@@ -176,10 +185,12 @@ public class SwerveDrive extends Swerve {
         turningMotors[3].setTargetPosition(individualTargetPositions[3]);
 
         individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
-        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
-        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
-        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontRight : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingBackLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingBackRight : individualTargetPositions[3];
 
+        /*If the physical sign of a certain wheel heading is negative, a boolean corresponding to that wheel in the boolean array 'headingsNegativeOrNot' will be set to true,
+         otherwise false. This will occur for all four wheels.*/
         headingsNegativeOrNot[0] = individualTargetPositions[0] != Math.abs(individualTargetPositions[0]);
         headingsNegativeOrNot[1] = individualTargetPositions[1] != Math.abs(individualTargetPositions[1]);
         headingsNegativeOrNot[2] = individualTargetPositions[2] != Math.abs(individualTargetPositions[2]);
@@ -205,12 +216,20 @@ public class SwerveDrive extends Swerve {
     }
 
     public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
+
+        /*If the asynchronous method controlling the robot's regular drive isn't set to true, that means the robot hasn't finished driving in way that it wants
+         * to yet and the program won't proceed. If set true, then the program can proceed.*/
         if(asyncMethodHasFinished.get()) {
             return;
         } else if(Math.abs(turningVector) < 0.05) {
             asyncMethodHasFinished.set(false);
         }
 
+        /*If the complete rotating vector movement is greater than or equal to a value of 0.05, then that means the human driver wants the robot
+         * to make a rotation on the spot left or right and this program will proceed. If not (and a complete robot rotation was done without being reset), then the robot
+         * will reset the heading of the wheels to the current heading of the robot and then will make the program return.
+         *
+         * Else, the rest of the driving down under will run to make the robot drive regularly.*/
         if(Math.abs(turningVector) >= 0.05) {
             if(asyncRotationMethodHasFinished.get()) {
                 asyncRotationMethodHasFinished.set(false);
@@ -241,6 +260,8 @@ public class SwerveDrive extends Swerve {
         int totalHeadingBackRight = calculateTotalHeading(individualWheelHeadings[3], normalizedHeading, 3);
         int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, normalizedHeading, individualWheelHeadings[3]);
 
+        /*If the heading of a certain wheel on the robot has been reversed to reach the desired target angle, then a boolean corresponding to the wheel in the boolean
+         * array 'headingsReversed' wil be set to true. Else, that boolean will be set false, and so forth will occur again and again for the other wheels.*/
         headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
@@ -257,10 +278,12 @@ public class SwerveDrive extends Swerve {
         turningMotors[3].setTargetPosition(individualTargetPositions[3]);
 
         individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
-        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
-        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
-        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontRight : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingBackLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingBackRight : individualTargetPositions[3];
 
+        /*If the physical sign of a certain wheel heading is negative, a boolean corresponding to that wheel in the boolean array 'headingsNegativeOrNot' will be set to true,
+         otherwise false. This will occur for all four wheels.*/
         headingsNegativeOrNot[0] = individualTargetPositions[0] != Math.abs(individualTargetPositions[0]);
         headingsNegativeOrNot[1] = individualTargetPositions[1] != Math.abs(individualTargetPositions[1]);
         headingsNegativeOrNot[2] = individualTargetPositions[2] != Math.abs(individualTargetPositions[2]);
@@ -301,9 +324,9 @@ public class SwerveDrive extends Swerve {
         headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
-        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
-        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
-        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontRight : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingBackLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingBackRight : individualTargetPositions[3];
 
         CompletableFuture.runAsync(() -> {
 
@@ -372,9 +395,9 @@ public class SwerveDrive extends Swerve {
         headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
         individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
-        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
-        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
-        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontRight : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingBackLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingBackRight : individualTargetPositions[3];
 
         previousTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
         previousTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
@@ -475,7 +498,7 @@ public class SwerveDrive extends Swerve {
     public void setPowerToIndividualWheel(int wheelNumber, boolean headingIsNegative) {
         CompletableFuture.runAsync(() -> {
             turningMotors[wheelNumber].set(headingIsNegative ? -1 : 1);
-            while(!turningMotors[0].atTargetPosition()) {
+            while(!turningMotors[wheelNumber].atTargetPosition()) {
                 try {
                     Thread.sleep(10);
                 } catch(Exception e) {
