@@ -58,7 +58,8 @@ public class SwerveDrive extends Swerve {
 
     /**Array containing the boolean states of if any wheel has their individual heading reversed due to their total heading
      * being greater than 180 degrees.*/
-    private final boolean[] headingsReversed = new boolean[4];
+    private final boolean[] headingsReversed = new boolean[4],
+    headingsNegativeOrNot = new boolean[4];
 
     /**The previous turning vector from when the robot rotated last.*/
     private int previousTurningVector = 0;
@@ -105,6 +106,7 @@ public class SwerveDrive extends Swerve {
     public void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
         if(stopMotorsIsRunning) {
             stop();
+            return;
         }
 
         int heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
@@ -178,7 +180,12 @@ public class SwerveDrive extends Swerve {
         individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
         individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
 
-        setPower(headingsReversed, forwardVector);
+        headingsNegativeOrNot[0] = individualTargetPositions[0] != Math.abs(individualTargetPositions[0]);
+        headingsNegativeOrNot[1] = individualTargetPositions[1] != Math.abs(individualTargetPositions[1]);
+        headingsNegativeOrNot[2] = individualTargetPositions[2] != Math.abs(individualTargetPositions[2]);
+        headingsNegativeOrNot[3] = individualTargetPositions[3] != Math.abs(individualTargetPositions[3]);
+
+        setPower(headingsNegativeOrNot, forwardVector);
     }
 
     /**Calculates and returns the total heading of a specific turning motor, which is the sum of the turning motor's current heading
@@ -254,7 +261,12 @@ public class SwerveDrive extends Swerve {
         individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
         individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
 
-        setPower(headingsReversed, forwardVector);
+        headingsNegativeOrNot[0] = individualTargetPositions[0] != Math.abs(individualTargetPositions[0]);
+        headingsNegativeOrNot[1] = individualTargetPositions[1] != Math.abs(individualTargetPositions[1]);
+        headingsNegativeOrNot[2] = individualTargetPositions[2] != Math.abs(individualTargetPositions[2]);
+        headingsNegativeOrNot[3] = individualTargetPositions[3] != Math.abs(individualTargetPositions[3]);
+
+        setPower(headingsNegativeOrNot, forwardVector);
     }
 
     @Override
@@ -288,12 +300,21 @@ public class SwerveDrive extends Swerve {
         headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
 
+        individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
+
         CompletableFuture.runAsync(() -> {
 
             turningMotors[0].setTargetPosition(headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0]);
             turningMotors[1].setTargetPosition(headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1]);
             turningMotors[2].setTargetPosition(headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2]);
             turningMotors[3].setTargetPosition(headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3]);
+
+            for(int i = 0; i < turningMotors.length; i++) {
+                turningMotors[i].set(headingsNegativeOrNot[i] ? -1 : 1);
+            }
 
             while(!allWheelsHaveRotatedToPosition()) {
                 try {
@@ -316,6 +337,7 @@ public class SwerveDrive extends Swerve {
             alreadyRotated.set(false);
         });
     }
+    
     @Override
     public void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
         if(!asyncRotationMethodHasFinished.get()) {
@@ -348,6 +370,11 @@ public class SwerveDrive extends Swerve {
         headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
         headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
+
+        individualWheelHeadings[0] = headingsReversed[0] ? individualWheelHeadings[0] + reversedHeadingFrontLeft : individualTargetPositions[0];
+        individualWheelHeadings[1] = headingsReversed[1] ? individualWheelHeadings[1] + reversedHeadingFrontLeft : individualTargetPositions[1];
+        individualWheelHeadings[2] = headingsReversed[2] ? individualWheelHeadings[2] + reversedHeadingFrontLeft : individualTargetPositions[2];
+        individualWheelHeadings[3] = headingsReversed[3] ? individualWheelHeadings[3] + reversedHeadingFrontLeft : individualTargetPositions[3];
 
         previousTargetPositions[0] = headingsReversed[0] ? reversedHeadingFrontLeft : individualTargetPositions[0];
         previousTargetPositions[1] = headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1];
@@ -406,7 +433,7 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public void setPower(boolean[] headingsReversed,  double forwardVector) {
+    public void setPower(boolean[] headingIsNegative,  double forwardVector) {
         CompletableFuture.runAsync(() -> {
 
             setPowerToIndividualWheel(0, headingsReversed[0]);
