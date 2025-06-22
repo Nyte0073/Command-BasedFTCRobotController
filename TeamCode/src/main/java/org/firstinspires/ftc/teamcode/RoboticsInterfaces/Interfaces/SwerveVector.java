@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces;
 
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
 
-public class RobotVector {
+public class SwerveVector {
     /**The IMU orientation of the robot, in degrees.*/
     public int imuHeadingInDegrees;
     /**The forward power (y-coordinate) driver input from the driver's controller.*/
@@ -18,7 +18,7 @@ public class RobotVector {
 
     /**Constructs a new {@code RobotVector()} with initialized {@code imuHeadingInDegrees}, {@code forwardPower}, {@code sidePower},
      * {@code turningVector}, {@code fieldOriented} and {@code turningLeft} variables.*/
-    public RobotVector(int imuHeadingInDegrees, double forwardPower, double sidePower, double turningVector, boolean fieldOriented, boolean turningLeft) {
+    public SwerveVector(int imuHeadingInDegrees, double forwardPower, double sidePower, double turningVector, boolean fieldOriented, boolean turningLeft) {
         this.imuHeadingInDegrees = imuHeadingInDegrees;
         this.forwardPower  = forwardPower;
         this.sidePower = sidePower;

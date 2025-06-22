@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
-import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.RobotVector;
+import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.SwerveVector;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Swerve;
 
 import java.util.concurrent.CompletableFuture;
@@ -510,8 +510,8 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public RobotVector getRobotVector() {
-        return new RobotVector((int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)),
+    public SwerveVector getRobotVector() {
+        return new SwerveVector((int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)),
                 -gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX(), fieldOriented, gamepadEx.getRightX() != Math.abs(gamepadEx.getRightX()));
     }
 

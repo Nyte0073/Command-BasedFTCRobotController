@@ -49,7 +49,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
      * human driver.*/
     @Override
     public void drive() {
-        RobotVector robotVector = getRobotVector();
+        SwerveVector robotVector = getRobotVector();
 
         forwardPower = robotVector.forwardPower;
         sidePower = robotVector.sidePower;
@@ -100,7 +100,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
     public abstract int normalizeHeading(int currentPosition, int targetPosition);
 
     /**Returns the RobotVector (user input information) about the robot.*/
-    public abstract RobotVector getRobotVector();
+    public abstract SwerveVector getRobotVector();
 
     /**Sets the power of the turning and driving wheels of the robot when driving normally at a certain angle.*/
     public abstract void setPower(boolean[] headingsReversed, double forwardVector);

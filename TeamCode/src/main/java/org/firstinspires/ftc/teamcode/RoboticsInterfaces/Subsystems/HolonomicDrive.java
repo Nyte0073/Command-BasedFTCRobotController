@@ -1,106 +1,81 @@
 package org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems;
 
+
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Holonomic;
-import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.RobotVector;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.List;
 
 public class HolonomicDrive extends Holonomic {
 
+    String driveType;
+
+    Motor[] HDriveMotors, XDriveMotors;
+
     GamepadEx gamepadEx;
 
-    Motor frontMiddle, backLeft, backRight;
+    double[] motorAngles;
 
     IMU imu;
 
-    Telemetry telemetry;
+    boolean fieldOriented;
 
-    public AtomicBoolean asyncSettingPowerMethodFinished = new AtomicBoolean(false);
-
-    private boolean fieldOriented;
-
-    public HolonomicDrive(GamepadEx gamepadEx, Motor[] motors, IMU imu, Telemetry telemetry, boolean fieldOriented) {
+    public HolonomicDrive(String driveType, Motor[] HDriveMotors, Motor[] XDriveMotors, GamepadEx gamepadEx, double[] motorAngles, IMU imu, boolean fieldOriented) {
+        this.driveType = driveType;
+        this.HDriveMotors = HDriveMotors;
+        this.XDriveMotors = XDriveMotors;
         this.gamepadEx = gamepadEx;
+        this.motorAngles = motorAngles;
         this.imu = imu;
-        this.telemetry = telemetry;
         this.fieldOriented = fieldOriented;
-
-        frontMiddle = motors[0];
-        backLeft = motors[1];
-        backRight = motors[2];
-
-        for(Motor m : motors) {
-            m.stopAndResetEncoder();
-            m.setRunMode(Motor.RunMode.PositionControl);
-        }
-
-        imu.resetYaw();
     }
 
     @Override
-    public void setPower(int headingInDegrees, boolean fieldOriented, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
-        int heading = (Math.abs(forwardPower) <= 0.01 && Math.abs(sidePower) <= 0.01) ? 0 :
-                (int) Math.toDegrees(Math.atan2(forwardPower, sidePower)) - 90;
-
-        if(fieldOriented) {
-            driveFieldOriented(heading, headingInDegrees, forwardPower, sidePower, turningVector, turningLeft);
-        } else {
-            driveRobotOriented(heading, forwardPower, sidePower, turningVector, turningLeft);
-        }
+    public String getDriveType() {
+        return driveType;
     }
 
-    public void driveFieldOriented(int heading, int headingInDegrees, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
-        if(!asyncSettingPowerMethodFinished.get()) {
-            return;
-        } else if(turningVector < 0.05) {
-            asyncSettingPowerMethodFinished.set(false);
-        }
-
-
+    @Override
+    public List<Motor[]> getHolonomicMotors() {
+        return List.of(HDriveMotors, XDriveMotors);
     }
 
-    public void driveRobotOriented(int headingInDegrees, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
-        if(!asyncSettingPowerMethodFinished.get()) {
-            return;
-        } else if(turningVector < 0.05) {
-            asyncSettingPowerMethodFinished.set(false);
-        }
+    @Override
+    public double[] getHolonomicMotorAngles() {
+        return motorAngles;
     }
 
-    public void setPowerForDrive(double frontMiddlePower, double backLeftPower, double backRightPower) {
-        CompletableFuture.runAsync(() -> {
-            frontMiddle.set(frontMiddlePower);
-            backLeft.set(backLeftPower);
-            backRight.set(backRightPower);
-        }).thenRun(() -> {
-            asyncSettingPowerMethodFinished.set(true);
-        });
+    @Override
+    public boolean getFieldOriented() {
+        return fieldOriented;
+    }
+
+    @Override
+    public GamepadEx getGamepadEx() {
+        return gamepadEx;
+    }
+
+    @Override
+    public IMU getIMU() {
+        return imu;
     }
 
     @Override
     public void stopMotors() {
-        frontMiddle.set(0);
-        backLeft.set(0);
-        backRight.set(0);
-    }
+        switch(driveType) {
+            case "HDrive":
+                for(Motor m : HDriveMotors) {
+                    m.set(0);
+                }
+                break;
 
-    @Override
-    public RobotVector getRobotVector() {
-        return new RobotVector((int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)), -gamepadEx.getLeftY(),
-                gamepadEx.getLeftX(), gamepadEx.getRightX(), fieldOriented,
-                gamepadEx.getRightX() != Math.abs(gamepadEx.getRightX()));
-    }
-
-    @Override
-    public void periodic() {
-        telemetry.update();
+            case "XDrive":
+                for(Motor m : XDriveMotors) {
+                    m.set(0);
+                }
+                break;
+        }
     }
 }

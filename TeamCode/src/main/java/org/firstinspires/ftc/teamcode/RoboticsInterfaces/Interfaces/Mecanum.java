@@ -15,11 +15,12 @@ public abstract class Mecanum extends SubsystemBase implements Driveable {
     /**Drives the robot either in a field-oriented or non field-oriented way.*/
     @Override
     public void drive() {
+        MecanumDrive mecanumDrive = getMecanumDrive();
         if(getFieldOriented()) {
-            getMecanumDrive().driveFieldCentric(getGamepadEx().getLeftX(), -getGamepadEx().getLeftY(),
+            mecanumDrive.driveFieldCentric(getGamepadEx().getLeftX(), -getGamepadEx().getLeftY(),
                     getGamepadEx().getRightX(), getIMU().getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         } else {
-            getMecanumDrive().driveRobotCentric(getGamepadEx().getLeftX(), -getGamepadEx().getLeftY(),
+            mecanumDrive.driveRobotCentric(getGamepadEx().getLeftX(), -getGamepadEx().getLeftY(),
                     getGamepadEx().getRightX());
         }
     }
