@@ -5,7 +5,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Holonomic;
+
+import java.util.HashMap;
 import java.util.List;
 
 public class HolonomicDrive extends Holonomic {
@@ -21,6 +24,8 @@ public class HolonomicDrive extends Holonomic {
     IMU imu;
 
     boolean fieldOriented;
+
+    Telemetry telemetry;
 
     public HolonomicDrive(String driveType, Motor[] HDriveMotors, Motor[] XDriveMotors, GamepadEx gamepadEx, double[] motorAngles, IMU imu, boolean fieldOriented) {
         this.driveType = driveType;
@@ -77,5 +82,14 @@ public class HolonomicDrive extends Holonomic {
                 }
                 break;
         }
+    }
+
+    @Override
+    public void periodic() {
+        updateTelemetry(
+               telemetry, new HashMap<String, Object>() {{
+                   put("Motor Angles", motorAngles);
+                }}
+        );
     }
 }

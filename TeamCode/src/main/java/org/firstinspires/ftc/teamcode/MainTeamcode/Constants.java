@@ -15,6 +15,13 @@ public class Constants {
         public static final String backRightMotor = "back_right";
     }
 
+    public static class HolonomicConstants {
+
+        /**The motor angle constants for a three wheel holonomic drive. You can changes these depending on the configuration of your
+         * holonomic drive, just make sure to ONLY change it here, in the {@code MotorConstants.HolonomicConstants} class and no where else.*/
+        public static final double[] motorAngles = {60, 120, 270};
+    }
+
     public static class SwerveConstants {
 
         /**Front-left swerve driving motor.*/
