@@ -15,7 +15,7 @@ public class SwerveDriveFields {
     reversedHeadingBackLeft, totalHeadingBackRight, reversedHeadingBackRight, previousTurningVector;
     public volatile boolean[] headingsReversed = new boolean[4], headingsNegativeOrNot = new boolean[4], wheelsHaveRotated = new boolean[4];
     public volatile int[] individualWheelHeadings = {0, 0, 0, 0}, individualTargetPositions = new int[4], previousTargetPositions = new int[4];
-    public volatile boolean previousTurningLeft = false, fieldOriented;
+    public volatile boolean previousTurningLeft = false, fieldOriented, alreadyRotated;
 
     public volatile GamepadEx gamepadEx;
     public static volatile boolean stopMotorsIsRunning = false;

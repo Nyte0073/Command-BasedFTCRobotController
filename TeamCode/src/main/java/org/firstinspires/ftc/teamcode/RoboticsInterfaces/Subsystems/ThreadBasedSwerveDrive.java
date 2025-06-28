@@ -365,10 +365,16 @@ public class ThreadBasedSwerveDrive extends Swerve {
         }
 
         Arrays.fill(swerveDriveFields.wheelsHaveRotated, false);
+        swerveDriveFields.alreadyRotated = false;
     }
 
     @Override
     public void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
+        if(swerveDriveFields.alreadyRotated) {
+            setPowerForCompleteRotate(swerveDriveFields.previousTurningLeft, swerveDriveFields.headingsReversed, swerveDriveFields.previousTurningVector, new int[] {}, false);
+            return;
+        }
+
         swerveDriveFields.previousTurningLeft = turningLeft;
 
         int headingFLBR = -45, headingFRBL = 45;
@@ -434,6 +440,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
         swerveDriveFields.drivingMotors[3].set(headingsReversed[3] ? (turningLeft ? -turningVector : turningVector) : (turningLeft ? turningVector : -turningVector));
 
         Arrays.fill(swerveDriveFields.wheelsHaveRotated, false);
+        swerveDriveFields.alreadyRotated = true;
     }
 
     @Override
