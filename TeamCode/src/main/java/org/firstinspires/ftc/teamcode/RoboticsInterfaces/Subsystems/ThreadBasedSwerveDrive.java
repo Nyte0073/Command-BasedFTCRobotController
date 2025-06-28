@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.SwerveDriveF
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.SwerveVector;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ThreadBasedSwerveDrive extends Swerve {
 
@@ -130,6 +129,10 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
         for(Motor m : drivingMotors) {
             m.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        }
+
+        for(Thread thread : threads) {
+            thread.start();
         }
     }
 
