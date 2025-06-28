@@ -371,6 +371,7 @@ public class SwerveDrive extends Swerve {
 
         if(alreadyRotated.get()) {
             setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, new int[] {}, false);
+            return;
         }
 
         previousTurningLeft = turningLeft;

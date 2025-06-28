@@ -48,7 +48,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
      * the state of all the robot's driving components so that the robot drives in the new updated way according to the
      * human driver.*/
     @Override
-    public void drive() {
+    public void drive() throws Exception {
         SwerveVector robotVector = getRobotVector();
 
         forwardPower = robotVector.forwardPower;
@@ -76,7 +76,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
      * position (depending on if the user push the left or right joystick certain directions). If the user input corresponds to driving, the robot
      * will drive depending on the state of the {@code fieldOriented} boolean parameter, which will ensure that the robot either drives field-oriented
      * or robot-oriented.*/
-    public abstract void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft);
+    public abstract void setSwerveModuleState(boolean fieldOriented, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) throws Exception;
 
     /**Stops the turning and driving motors of the robot by setting their motor powers to 0.*/
     public abstract void stopMotors();

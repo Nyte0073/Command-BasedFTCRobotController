@@ -14,6 +14,8 @@ public class HolonomicTeleop extends CommandOpMode {
 
     @Override
     public void initialize() {
+
+        /*Initializing everything for the subsystems and commands.*/
         GamepadEx gamepadEx = new GamepadEx(gamepad1);
         IMU imu = hardwareMap.get(IMU.class, "imu");
 
@@ -36,6 +38,7 @@ public class HolonomicTeleop extends CommandOpMode {
         HolonomicDriveCommand driveCommand = new HolonomicDriveCommand(holonomicDrive, imu, gamepadEx);
         holonomicDrive.setDefaultCommand(driveCommand);
 
+        /*Holonomic drive subsystem needs this, or else its 'periodic' method won't be called.*/
         register(holonomicDrive);
     }
 }

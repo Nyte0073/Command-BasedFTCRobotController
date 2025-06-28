@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.MecanumDrive
 
 @TeleOp(name = "MecanumTeleop", group = "teamcode")
 public class MecanumTeleop extends CommandOpMode {
-    GamepadEx gamepadEx;
 
+    /*Initializing the requisite components for the MecanumDrive subsystem and MecanumDriveCommands.*/
     @Override
     public void initialize() {
         Motor[] motors = new Motor[] {
@@ -22,9 +22,9 @@ public class MecanumTeleop extends CommandOpMode {
                 new Motor(hardwareMap, Constants.MotorConstants.backRightMotor)
         };
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        gamepadEx = new GamepadEx(gamepad1);
+        GamepadEx gamepadEx = new GamepadEx(gamepad1);
         MecanumDrive mecanumDrive = new MecanumDrive(motors, telemetry, imu, true, gamepadEx);
         MecanumDriveCommand mecanumDriveCommand = new MecanumDriveCommand(mecanumDrive, gamepadEx, imu);
-        mecanumDrive.setDefaultCommand(mecanumDriveCommand);
+        mecanumDrive.setDefaultCommand(mecanumDriveCommand); //Needs this to make MecanumDriveCommand when on default and not only when it's called.
     }
 }

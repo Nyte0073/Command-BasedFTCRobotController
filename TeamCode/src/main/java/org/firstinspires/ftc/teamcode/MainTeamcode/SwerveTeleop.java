@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.SwerveDrive;
 public class SwerveTeleop extends CommandOpMode {
     @Override
     public void initialize() {
+
+        /*Initializing everything for the SwerveDrive subsystem and the SwerveDriveCommand.*/
         Motor[] turningMotors = new Motor[] {
                 new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
@@ -29,7 +31,7 @@ public class SwerveTeleop extends CommandOpMode {
         IMU imu = hardwareMap.get(IMU.class, "imu");
         SwerveDrive swerveDrive = new SwerveDrive(telemetry, turningMotors, drivingMotors, imu, gamepadEx, true);
         SwerveDriveCommand swerveDriveCommand = new SwerveDriveCommand(swerveDrive, gamepadEx, imu);
-        swerveDrive.setDefaultCommand(swerveDriveCommand);
-        register(swerveDrive);
+        swerveDrive.setDefaultCommand(swerveDriveCommand); //Need this to make SwerveDriveCommand make robot drive ond default, no matter what.
+        register(swerveDrive); //Need this for SwerveDrive subsystem to have its 'periodic' method called.
     }
 }

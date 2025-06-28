@@ -7,7 +7,7 @@ import java.util.Map;
 public interface Driveable {
     void stop();
     void updateTelemetry(Telemetry telemetry, Map<String, Object> telemetryMap);
-    void drive();
+    void drive() throws Exception;
     void resetGyro(IMU imu);
 }
 

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.MainTeamcode;
 
+/**Class containing the constant variables for all the subsystems, so that each subsystem has to be designed in a manner
+ * that fits within the constraints of the constants.*/
 public class Constants {
     public static class MotorConstants {
         /**Front-left mecanum drive motor/swerve turning motor..*/

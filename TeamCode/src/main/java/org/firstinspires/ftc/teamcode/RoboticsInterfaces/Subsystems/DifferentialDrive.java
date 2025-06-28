@@ -7,6 +7,8 @@ import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Differential;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.DifferentialVector;
 
+/**Class containing the methods for running a smooth differential drive, either in a tank or arcade style,
+ * depending on what kind of driving the human driver wants their robot to have.*/
 public class DifferentialDrive extends Differential {
 
     GamepadEx gamepadEx;

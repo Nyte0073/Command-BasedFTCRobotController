@@ -14,6 +14,8 @@ public class DifferentialTeleop extends CommandOpMode {
 
     @Override
     public void initialize() {
+
+        /*Initializing everything for the subsystems and commands for DifferentialDrive.*/
         GamepadEx gamepadEx = new GamepadEx(gamepad1);
         IMU imu = hardwareMap.get(IMU.class, "imu");
 
@@ -28,6 +30,7 @@ public class DifferentialTeleop extends CommandOpMode {
         DifferentialDriveCommand differentialDriveCommand = new DifferentialDriveCommand(differentialDrive, imu, gamepadEx);
         differentialDrive.setDefaultCommand(differentialDriveCommand);
 
+        /*Subsystem needs this method called or else it's 'periodic' method won't be run.*/
         register(differentialDrive);
     }
 }
