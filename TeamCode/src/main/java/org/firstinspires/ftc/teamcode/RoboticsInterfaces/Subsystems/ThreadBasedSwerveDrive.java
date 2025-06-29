@@ -40,16 +40,15 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                     }
                                 }
 
-                                if(driveNeeded) { //Both the methods below need to be constantly updated by the program.
+                                if(driveNeeded && !completeRotateNeeded) { //Both the methods below need to be constantly updated by the program.
                                     runnables[0].run(); //Running the applyFieldOrientedSwerve/applyRobotOrientedSwerve methods.
                                     runnables[1].run(); //Running the setPower methods.
+
+                                    driveLock.notifyAll();
+                                    driveNeeded = false;
+                                    driveActive = false;
                                 }
 
-                                if(!completeRotateNeeded) {
-                                    driveLock.notifyAll();
-                                }
-                                driveNeeded = false;
-                                driveActive = false;
                             }
 
                             try {
@@ -69,9 +68,10 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
                                 runnables[2].run(); //Runs the completeRotate method.
                                 runnables[3].run(); //Runs the setPowerForCompleteRotate method.
+
                                 completeRotateNeeded = false;
                                 completeRotateActive = false;
-                                rotationWasDone= true;
+                                rotationWasDone = true;
 
                                 try {
                                     Thread.sleep(20);
@@ -88,16 +88,17 @@ public class ThreadBasedSwerveDrive extends Swerve {
                         while(!Thread.currentThread().isInterrupted()) {
                             synchronized (driveLock) {
 
-                                if(wheelsNeedToBeReset) {
+                                if(wheelsNeedToBeReset && !completeRotateNeeded) {
 
                                     /*For tis specific runnable below, you need to make sure that the code for the resetWheelHeading()
                                      * method inside this runnable is updated WITHIN THE THREAD ITSELF. It is because these values can change
                                      * very quickly and you need them to be EXACTLY up to date for the code in this runnable to work
                                      * effectively.*/
 
-                                    runnables[4].run(); //This method needs to be constantly updated by the program.
-                                    resetWheelActive = false;
-                                    rotationWasDone = false;
+                                        runnables[4].run(); //This method needs to be constantly updated by the program.
+                                        resetWheelActive = false;
+                                        rotationWasDone = false;
+
                                 }
                             }
 
@@ -152,6 +153,12 @@ public class ThreadBasedSwerveDrive extends Swerve {
             applyFieldOrientedSwerve(heading, forwardPower, sidePower, headingInDegrees, turningVector, turningLeft);
         } else {
             applyRobotOrientedSwerve(heading, forwardPower, sidePower, turningVector, turningLeft);
+        }
+    }
+
+    public void stopThreads() {
+        for(Thread thread : threads) {
+            thread.interrupt();
         }
     }
 
