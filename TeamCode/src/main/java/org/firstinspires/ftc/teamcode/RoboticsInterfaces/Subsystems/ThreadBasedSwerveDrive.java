@@ -17,7 +17,13 @@ import java.util.Arrays;
 
 public class ThreadBasedSwerveDrive extends Swerve {
 
-    Runnable[] runnables = new Runnable[5];
+    Runnable[] runnables = new Runnable[] {
+            () -> {},
+            () -> {},
+            () -> {},
+            () -> {},
+            () -> {}
+    };
 
     final Object driveLock = new Object();
 
