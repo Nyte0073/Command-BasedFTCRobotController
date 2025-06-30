@@ -19,19 +19,19 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
     Runnable[] runnables = new Runnable[5];
 
-    volatile boolean completeRotateNeeded, wheelsNeedToBeReset, driveNeeded, driveActive,
-            completeRotateActive, resetWheelActive, rotationWasDone;
-
     final Object driveLock = new Object();
 
     final SwerveDriveFields swerveDriveFields = new SwerveDriveFields();
+
+    volatile SwerveState swerveState = SwerveState.IDLE;
+    volatile CompleteRotations rotations = CompleteRotations.ROTATION_WAS_NOT_DONE;
 
     Thread[] threads = {
             new Thread( //Driving thread.
                     () -> {
                         while(!Thread.currentThread().isInterrupted()) {
                             synchronized (driveLock) {
-                                while(completeRotateNeeded) {
+                                while(swerveState != SwerveState.DRIVE && swerveState != SwerveState.IDLE) {
                                     try {
                                         driveLock.wait();
                                     } catch(Exception e) {
@@ -39,16 +39,10 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                         break;
                                     }
                                 }
-
-                                if(driveNeeded && !completeRotateNeeded) { //Both the methods below need to be constantly updated by the program.
+                                    driveLock.notifyAll();
                                     runnables[0].run(); //Running the applyFieldOrientedSwerve/applyRobotOrientedSwerve methods.
                                     runnables[1].run(); //Running the setPower methods.
-
-                                    driveLock.notifyAll();
-                                    driveNeeded = false;
-                                    driveActive = false;
-                                }
-
+                                    swerveState = SwerveState.IDLE;
                             }
 
                             try {
@@ -64,20 +58,27 @@ public class ThreadBasedSwerveDrive extends Swerve {
             new Thread( //Complete rotate thread.
                     () -> {
                         while(!Thread.currentThread().isInterrupted()) {
-                            if(completeRotateNeeded) { //Both those methods below need to be constantly updated by the program.
-
-                                runnables[2].run(); //Runs the completeRotate method.
-                                runnables[3].run(); //Runs the setPowerForCompleteRotate method.
-
-                                completeRotateNeeded = false;
-                                completeRotateActive = false;
-                                rotationWasDone = true;
-
-                                try {
-                                    Thread.sleep(20);
-                                } catch(Exception e) {
-                                    Thread.currentThread().interrupt();
+                            synchronized (driveLock) {
+                                while(swerveState != SwerveState.COMPLETE_ROTATE && swerveState != SwerveState.IDLE) {
+                                    try {
+                                        driveLock.wait();
+                                    } catch(Exception e) {
+                                        Thread.currentThread().interrupt();
+                                        break;
+                                    }
                                 }
+
+                                    driveLock.notifyAll();
+                                    runnables[2].run(); //Runs the completeRotate method.
+                                    runnables[3].run(); //Runs the setPowerForCompleteRotate method.
+                                    swerveState = SwerveState.IDLE;
+                                    rotations = CompleteRotations.ROTATION_WAS_DONE;
+                            }
+
+                            try {
+                                Thread.sleep(25);
+                            } catch(Exception e) {
+                                Thread.currentThread().interrupt();
                             }
                         }
                     }
@@ -88,22 +89,27 @@ public class ThreadBasedSwerveDrive extends Swerve {
                         while(!Thread.currentThread().isInterrupted()) {
                             synchronized (driveLock) {
 
-                                if(wheelsNeedToBeReset && !completeRotateNeeded) {
+                                while(swerveState != SwerveState.RESET_WHEEL && swerveState != SwerveState.IDLE) {
+                                   try {
+                                       driveLock.wait();
+                                   } catch(Exception e) {
+                                       Thread.currentThread().interrupt();
+                                       break;
+                                   }
+                                }
 
                                     /*For tis specific runnable below, you need to make sure that the code for the resetWheelHeading()
                                      * method inside this runnable is updated WITHIN THE THREAD ITSELF. It is because these values can change
                                      * very quickly and you need them to be EXACTLY up to date for the code in this runnable to work
                                      * effectively.*/
 
+                                        driveLock.notifyAll();
                                         runnables[4].run(); //This method needs to be constantly updated by the program.
-                                        resetWheelActive = false;
-                                        rotationWasDone = false;
-
-                                }
+                                swerveState = SwerveState.IDLE;
                             }
 
                             try {
-                                Thread.sleep(20);
+                                Thread.sleep(25);
                             } catch(Exception e) {
                                 Thread.currentThread().interrupt();
                                 break;
@@ -112,6 +118,18 @@ public class ThreadBasedSwerveDrive extends Swerve {
                     }
             )
     };
+
+    enum SwerveState {
+        IDLE,
+        DRIVE,
+        COMPLETE_ROTATE,
+        RESET_WHEEL;
+    }
+
+    enum CompleteRotations {
+        ROTATION_WAS_DONE,
+        ROTATION_WAS_NOT_DONE;
+    }
 
 
     public ThreadBasedSwerveDrive(Telemetry telemetry, Motor[] turningMotors, Motor[] drivingMotors, IMU imu, GamepadEx gamepadEx, boolean fieldOriented) {
@@ -163,7 +181,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
     }
 
     public void applyFieldOrientedSwerve(int heading, double forwardPower, double sidePower, int headingInDegrees, double turningVector, boolean turningLeft) {
-        if(Math.abs(turningVector) >= 0.05 && !driveActive && !completeRotateActive) {
+        if(Math.abs(turningVector) >= 0.05 && swerveState == SwerveState.IDLE) {
             runnables[2] = () -> completeRotate(turningLeft, headingInDegrees, turningVector, true);
             runnables[3] = () ->
                     setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector, new int[] {
@@ -172,10 +190,10 @@ public class ThreadBasedSwerveDrive extends Swerve {
                         swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2],
                         swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3]
                 }, true);
-            completeRotateNeeded = true;
-        } else if(rotationWasDone && !resetWheelActive) {
+            swerveState = SwerveState.COMPLETE_ROTATE;
+        } else if(rotations == CompleteRotations.ROTATION_WAS_DONE && swerveState == SwerveState.IDLE) {
            runnables[4] = this::resetWheelHeading;
-           wheelsNeedToBeReset = true;
+           swerveState = SwerveState.RESET_WHEEL;
         }
         //Implement regular driving operations.
 
@@ -227,9 +245,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
         };
 
         runnables[1] = () -> setPower(swerveDriveFields.headingsNegativeOrNot, swerveDriveFields.forwardVector);
-
-        driveActive = true;
-        driveNeeded = true;
+        swerveState = SwerveState.DRIVE;
     }
 
 
@@ -246,20 +262,19 @@ public class ThreadBasedSwerveDrive extends Swerve {
     }
 
     public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
-        if(Math.abs(turningVector) >= 0.05 && !driveActive && !completeRotateActive) {
+        if(Math.abs(turningVector) >= 0.05 && swerveState == SwerveState.IDLE) {
             runnables[2] = () -> completeRotate(turningLeft, 0, turningVector, false);
-            runnables[3] = () -> {
+            runnables[3] = () ->
                 setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector, new int[] {
                         swerveDriveFields.headingsReversed[0] ? swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0],
                         swerveDriveFields.headingsReversed[1] ? swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1],
                         swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2],
                         swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3]
                 }, true);
-            };
-            completeRotateNeeded = true;
-        } else if(rotationWasDone && !resetWheelActive) {
+            swerveState = SwerveState.COMPLETE_ROTATE;
+        } else if(rotations == CompleteRotations.ROTATION_WAS_DONE && swerveState == SwerveState.IDLE) {
             runnables[4] = this::resetWheelHeading;
-            wheelsNeedToBeReset = true;
+            swerveState = SwerveState.RESET_WHEEL;
         }
 
         //Implement regular driving operations.
@@ -312,9 +327,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
         };
 
         runnables[1] = () -> setPower(swerveDriveFields.headingsNegativeOrNot, swerveDriveFields.forwardVector);
-
-        driveActive = true;
-        driveNeeded = true;
+        swerveState = SwerveState.DRIVE;
     }
 
     @Override
