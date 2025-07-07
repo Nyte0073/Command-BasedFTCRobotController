@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.MainTeamcode;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Commands.ThreadBasedSwerveDriveCommand;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.ThreadBasedSwerveDrive;
 
+@TeleOp(name = "ThreadBasedSwerveTeleop", group = "teamcode")
 public class ThreadBasedSwerveTeleop extends CommandOpMode {
 
     @Override
