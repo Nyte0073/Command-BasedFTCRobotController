@@ -93,7 +93,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
     /**Sets the power of the turning/driving motors once the {@code completeRotate()} method finishes calculating the headings for all the individual
      * wheels. This method will set motor powers specific to if the headings of some of the wheels are reversed, and also if the robot is rotating left
      * or right.*/
-    public abstract void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition);
+    public abstract void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition, boolean[] headingsDirectionsNegative);
 
     /**Normalizes the difference between the target heading and current heading of the robot, so that it can take the shortest angle relative to its
      * current heading to get to the point on the Cartesian plane that the target heading points in the direction of.*/
@@ -101,6 +101,7 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
 
     /**Returns the RobotVector (user input information) about the robot.*/
     public abstract SwerveVector getRobotVector();
+
 
     /**Sets the power of the turning and driving wheels of the robot when driving normally at a certain angle.*/
     public abstract void setPower(boolean[] headingsReversed, double forwardVector);

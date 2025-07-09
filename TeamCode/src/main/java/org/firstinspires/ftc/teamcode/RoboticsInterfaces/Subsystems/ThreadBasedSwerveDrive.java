@@ -129,12 +129,12 @@ public class ThreadBasedSwerveDrive extends Swerve {
         IDLE,
         DRIVE,
         COMPLETE_ROTATE,
-        RESET_WHEEL;
+        RESET_WHEEL
     }
 
     enum CompleteRotations {
         ROTATION_WAS_DONE,
-        ROTATION_WAS_NOT_DONE;
+        ROTATION_WAS_NOT_DONE
     }
 
 
@@ -190,12 +190,8 @@ public class ThreadBasedSwerveDrive extends Swerve {
         if(Math.abs(turningVector) >= 0.05 && swerveState == SwerveState.IDLE) {
             runnables[2] = () -> completeRotate(turningLeft, headingInDegrees, turningVector, true);
             runnables[3] = () ->
-                    setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector, new int[] {
-                        swerveDriveFields.headingsReversed[0] ? swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0],
-                        swerveDriveFields.headingsReversed[1] ? swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1],
-                        swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2],
-                        swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3]
-                }, true);
+                    setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector,
+                            swerveDriveFields.individualTargetPositions, true, swerveDriveFields.headingsNegativeOrNot);
             swerveState = SwerveState.COMPLETE_ROTATE;
         } else if(rotations == CompleteRotations.ROTATION_WAS_DONE && swerveState == SwerveState.IDLE) {
            runnables[4] = this::resetWheelHeading;
@@ -204,61 +200,32 @@ public class ThreadBasedSwerveDrive extends Swerve {
         //Implement regular driving operations.
 
         runnables[0] = () -> {
-            swerveDriveFields.forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
+           swerveDriveFields.forwardVector = Math.hypot(sidePower, forwardPower) / Constants.SwerveConstants.vectorScalar;
+           swerveDriveFields.normalizedHeading = normalizeHeading(headingInDegrees, heading);
 
-            swerveDriveFields.normalizedHeading = normalizeHeading(headingInDegrees, heading);
+           for(int i = 0; i < swerveDriveFields.turningMotors.length; i++) {
+               int normalizedHeadingForWheel = normalizeHeading(swerveDriveFields.individualWheelHeadings[i], swerveDriveFields.normalizedHeading);
+               int totalHeadingForWheel = swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+               int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel,
+                       normalizedHeadingForWheel, swerveDriveFields.individualWheelHeadings[i]);
 
-            swerveDriveFields.totalHeadingFrontLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[0], swerveDriveFields.normalizedHeading, 0);
-            swerveDriveFields.reversedHeadingFrontLeft = calculateReverseHeading(swerveDriveFields.totalHeadingFrontLeft, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[0]);
+               int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ?  swerveDriveFields.individualWheelHeadings[i] +
+                       reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
 
-            swerveDriveFields.totalHeadingFrontRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[1], swerveDriveFields.normalizedHeading, 1);
-            swerveDriveFields.reversedHeadingFrontRight =  calculateReverseHeading(swerveDriveFields.totalHeadingFrontRight, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[1]);
+               swerveDriveFields.individualWheelHeadings[i] = normalizeHeading(0, swerveDriveFields.individualWheelHeadings[i]);
+               targetPosition = normalizeHeading(0, targetPosition);
+               swerveDriveFields.individualTargetPositions[i] = targetPosition;
 
-            swerveDriveFields.totalHeadingBackLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[2], swerveDriveFields.normalizedHeading, 2);
-            swerveDriveFields.reversedHeadingBackLeft = calculateReverseHeading(swerveDriveFields.totalHeadingBackLeft, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[2]);
+               swerveDriveFields.headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
 
-            swerveDriveFields.totalHeadingBackRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[3], swerveDriveFields.normalizedHeading, 3);
-            swerveDriveFields.reversedHeadingBackRight = calculateReverseHeading(swerveDriveFields.totalHeadingBackRight, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[3]);
-
-            /*If the heading of a certain wheel on the robot has been reversed to reach the desired target angle, then a boolean corresponding to the wheel in the boolean
-             * array 'headingsReversed' wil be set to true. Else, that boolean will be set false, and so forth will occur again and again for the other wheels.*/
-            swerveDriveFields.headingsReversed[0] = swerveDriveFields.reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[1] = swerveDriveFields.reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[2] = swerveDriveFields.reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[3] = swerveDriveFields.reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
-
-            swerveDriveFields.individualTargetPositions[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-            swerveDriveFields.individualTargetPositions[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-            swerveDriveFields.individualTargetPositions[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-            swerveDriveFields.individualTargetPositions[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
-
-            swerveDriveFields.turningMotors[0].setTargetPosition(swerveDriveFields.individualTargetPositions[0]);
-            swerveDriveFields.turningMotors[1].setTargetPosition(swerveDriveFields.individualTargetPositions[1]);
-            swerveDriveFields.turningMotors[2].setTargetPosition(swerveDriveFields.individualTargetPositions[2]);
-            swerveDriveFields.turningMotors[3].setTargetPosition(swerveDriveFields.individualTargetPositions[3]);
-
-            swerveDriveFields.individualWheelHeadings[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.individualWheelHeadings[0] + swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-            swerveDriveFields.individualWheelHeadings[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.individualWheelHeadings[1] + swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-            swerveDriveFields.individualWheelHeadings[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.individualWheelHeadings[2] + swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-            swerveDriveFields.individualWheelHeadings[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.individualWheelHeadings[3] + swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
-
-        /*If the physical sign of a certain wheel heading is negative, a boolean corresponding to that wheel in the boolean array 'headingsNegativeOrNot' will be set to true,
-         otherwise false. This will occur for all four wheels.*/
-            swerveDriveFields.headingsNegativeOrNot[0] = swerveDriveFields.individualTargetPositions[0] != Math.abs(swerveDriveFields.individualTargetPositions[0]);
-            swerveDriveFields.headingsNegativeOrNot[1] = swerveDriveFields.individualTargetPositions[1] != Math.abs(swerveDriveFields.individualTargetPositions[1]);
-            swerveDriveFields.headingsNegativeOrNot[2] = swerveDriveFields.individualTargetPositions[2] != Math.abs(swerveDriveFields.individualTargetPositions[2]);
-            swerveDriveFields.headingsNegativeOrNot[3] = swerveDriveFields.individualTargetPositions[3] != Math.abs(swerveDriveFields.individualTargetPositions[3]);
+               swerveDriveFields.turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
+               swerveDriveFields.individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                       reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+           }
         };
 
         runnables[1] = () -> setPower(swerveDriveFields.headingsNegativeOrNot, swerveDriveFields.forwardVector);
         swerveState = SwerveState.DRIVE;
-    }
-
-
-    public int calculateTotalHeading(int currentHeading, int targetHeading, int wheelNumber) {
-        int normalizedHeadingForWheel = normalizeHeading(currentHeading, targetHeading);
-        swerveDriveFields.individualTargetPositions[wheelNumber] = normalizedHeadingForWheel;
-        return currentHeading + normalizedHeadingForWheel;
     }
 
 
@@ -271,12 +238,8 @@ public class ThreadBasedSwerveDrive extends Swerve {
         if(Math.abs(turningVector) >= 0.05 && swerveState == SwerveState.IDLE) {
             runnables[2] = () -> completeRotate(turningLeft, 0, turningVector, false);
             runnables[3] = () ->
-                setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector, new int[] {
-                        swerveDriveFields.headingsReversed[0] ? swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0],
-                        swerveDriveFields.headingsReversed[1] ? swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1],
-                        swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2],
-                        swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3]
-                }, true);
+                setPowerForCompleteRotate(turningLeft, swerveDriveFields.headingsReversed, turningVector,
+                        swerveDriveFields.individualTargetPositions, false, swerveDriveFields.headingsNegativeOrNot);
             swerveState = SwerveState.COMPLETE_ROTATE;
         } else if(rotations == CompleteRotations.ROTATION_WAS_DONE && swerveState == SwerveState.IDLE) {
             runnables[4] = this::resetWheelHeading;
@@ -286,50 +249,28 @@ public class ThreadBasedSwerveDrive extends Swerve {
         //Implement regular driving operations.
 
         runnables[0] = () -> {
-            swerveDriveFields.forwardVector = Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
-
+            swerveDriveFields.forwardVector = Math.hypot(sidePower, forwardPower) / Constants.SwerveConstants.vectorScalar;
             swerveDriveFields.normalizedHeading = normalizeHeading(0, heading);
 
-            swerveDriveFields.totalHeadingFrontLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[0], swerveDriveFields.normalizedHeading, 0);
-            swerveDriveFields.reversedHeadingFrontLeft = calculateReverseHeading(swerveDriveFields.totalHeadingFrontLeft, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[0]);
+            for (int i = 0; i < swerveDriveFields.turningMotors.length; i++) {
+                int normalizedHeadingForWheel = normalizeHeading(swerveDriveFields.individualWheelHeadings[i], swerveDriveFields.normalizedHeading);
+                int totalHeadingForWheel = swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel,
+                        normalizedHeadingForWheel, swerveDriveFields.individualWheelHeadings[i]);
 
-            swerveDriveFields.totalHeadingFrontRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[1], swerveDriveFields.normalizedHeading, 1);
-            swerveDriveFields.reversedHeadingFrontRight =  calculateReverseHeading(swerveDriveFields.totalHeadingFrontRight, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[1]);
+                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                        reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
 
-            swerveDriveFields.totalHeadingBackLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[2], swerveDriveFields.normalizedHeading, 2);
-            swerveDriveFields.reversedHeadingBackLeft = calculateReverseHeading(swerveDriveFields.totalHeadingBackLeft, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[2]);
+                swerveDriveFields.individualWheelHeadings[i] = normalizeHeading(0, swerveDriveFields.individualWheelHeadings[i]);
+                targetPosition = normalizeHeading(0, targetPosition);
+                swerveDriveFields.individualTargetPositions[i] = targetPosition;
 
-            swerveDriveFields.totalHeadingBackRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[3], swerveDriveFields.normalizedHeading, 3);
-            swerveDriveFields.reversedHeadingBackRight = calculateReverseHeading(swerveDriveFields.totalHeadingBackRight, swerveDriveFields.normalizedHeading, swerveDriveFields.individualWheelHeadings[3]);
+                swerveDriveFields.headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
 
-            /*If the heading of a certain wheel on the robot has been reversed to reach the desired target angle, then a boolean corresponding to the wheel in the boolean
-             * array 'headingsReversed' wil be set to true. Else, that boolean will be set false, and so forth will occur again and again for the other wheels.*/
-            swerveDriveFields.headingsReversed[0] = swerveDriveFields.reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[1] = swerveDriveFields.reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[2] = swerveDriveFields.reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
-            swerveDriveFields.headingsReversed[3] = swerveDriveFields.reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
-
-            swerveDriveFields.individualTargetPositions[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-            swerveDriveFields.individualTargetPositions[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-            swerveDriveFields.individualTargetPositions[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-            swerveDriveFields.individualTargetPositions[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
-
-            swerveDriveFields.turningMotors[0].setTargetPosition(swerveDriveFields.individualTargetPositions[0]);
-            swerveDriveFields.turningMotors[1].setTargetPosition(swerveDriveFields.individualTargetPositions[1]);
-            swerveDriveFields.turningMotors[2].setTargetPosition(swerveDriveFields.individualTargetPositions[2]);
-            swerveDriveFields.turningMotors[3].setTargetPosition(swerveDriveFields.individualTargetPositions[3]);
-
-            swerveDriveFields.individualWheelHeadings[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.individualWheelHeadings[0] + swerveDriveFields.reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-            swerveDriveFields.individualWheelHeadings[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.individualWheelHeadings[1] + swerveDriveFields.reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-            swerveDriveFields.individualWheelHeadings[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.individualWheelHeadings[2] + swerveDriveFields.reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-            swerveDriveFields.individualWheelHeadings[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.individualWheelHeadings[3] + swerveDriveFields.reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
-
-        /*If the physical sign of a certain wheel heading is negative, a boolean corresponding to that wheel in the boolean array 'headingsNegativeOrNot' will be set to true,
-         otherwise false. This will occur for all four wheels.*/
-            swerveDriveFields.headingsNegativeOrNot[0] = swerveDriveFields.individualTargetPositions[0] != Math.abs(swerveDriveFields.individualTargetPositions[0]);
-            swerveDriveFields.headingsNegativeOrNot[1] = swerveDriveFields.individualTargetPositions[1] != Math.abs(swerveDriveFields.individualTargetPositions[1]);
-            swerveDriveFields.headingsNegativeOrNot[2] = swerveDriveFields.individualTargetPositions[2] != Math.abs(swerveDriveFields.individualTargetPositions[2]);
-            swerveDriveFields.headingsNegativeOrNot[3] = swerveDriveFields.individualTargetPositions[3] != Math.abs(swerveDriveFields.individualTargetPositions[3]);
+                swerveDriveFields.turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
+                swerveDriveFields.individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                        reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+            }
         };
 
         runnables[1] = () -> setPower(swerveDriveFields.headingsNegativeOrNot, swerveDriveFields.forwardVector);
@@ -350,32 +291,24 @@ public class ThreadBasedSwerveDrive extends Swerve {
     public void resetWheelHeading() {
         int botHeading = (int) Math.round(swerveDriveFields.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
-        int totalHeadingFrontLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[0], botHeading, 0);
-        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, botHeading, swerveDriveFields.individualWheelHeadings[0]);
+        for(int i = 0; i < swerveDriveFields.turningMotors.length; i++) {
+            int normalizedHeadingForWheel = normalizeHeading(swerveDriveFields.individualWheelHeadings[i], botHeading);
+            int totalHeading = swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+            int reversedHeading = calculateReverseHeading(totalHeading, normalizedHeadingForWheel, swerveDriveFields.individualWheelHeadings[i]);
 
-        int totalHeadingFrontRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[1], botHeading, 1);
-        int reversedHeadingFrontRight = calculateReverseHeading(totalHeadingFrontRight, botHeading, swerveDriveFields.individualWheelHeadings[1]);
+            int targetPosition = reversedHeading != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] + reversedHeading :
+                   swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
 
-        int totalHeadingBackLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[2], botHeading, 2);
-        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, botHeading, swerveDriveFields.individualWheelHeadings[2]);
+            swerveDriveFields.individualWheelHeadings[i] = normalizeHeading(0, swerveDriveFields.individualWheelHeadings[i]);
+            targetPosition = normalizeHeading(0, targetPosition);
+            swerveDriveFields.individualTargetPositions[i] = targetPosition;
+            swerveDriveFields.headingsReversed[i] = reversedHeading != Constants.SwerveConstants.NO_REVERSAL;
+            swerveDriveFields.headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
 
-        int totalHeadingBackRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[3], botHeading, 3);
-        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, botHeading, swerveDriveFields.individualWheelHeadings[3]);
-
-        swerveDriveFields.headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
-
-        swerveDriveFields.individualWheelHeadings[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.individualWheelHeadings[0] + reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-        swerveDriveFields.individualWheelHeadings[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.individualWheelHeadings[1] + reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-        swerveDriveFields.individualWheelHeadings[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.individualWheelHeadings[2] + reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-        swerveDriveFields.individualWheelHeadings[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.individualWheelHeadings[3] + reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
-
-        swerveDriveFields.turningMotors[0].setTargetPosition(swerveDriveFields.headingsReversed[0] ? reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0]);
-        swerveDriveFields.turningMotors[1].setTargetPosition(swerveDriveFields.headingsReversed[1] ? reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1]);
-        swerveDriveFields.turningMotors[2].setTargetPosition(swerveDriveFields.headingsReversed[2] ? reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2]);
-        swerveDriveFields.turningMotors[3].setTargetPosition(swerveDriveFields.headingsReversed[3] ? reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3]);
+            swerveDriveFields.turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
+            swerveDriveFields.individualWheelHeadings[i] = reversedHeading != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                    reversedHeading : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+        }
 
         for(int i = 0; i < swerveDriveFields.turningMotors.length; i++) {
             swerveDriveFields.turningMotors[i].set(swerveDriveFields.headingsNegativeOrNot[i] ? -1 : 1);
@@ -400,7 +333,9 @@ public class ThreadBasedSwerveDrive extends Swerve {
     @Override
     public void completeRotate(boolean turningLeft, int imuHeadingInDegrees, double turnVector, boolean fieldOriented) {
         if(swerveDriveFields.alreadyRotated) {
-            setPowerForCompleteRotate(swerveDriveFields.previousTurningLeft, swerveDriveFields.headingsReversed, swerveDriveFields.previousTurningVector, new int[] {}, false);
+            setPowerForCompleteRotate(swerveDriveFields.previousTurningLeft, swerveDriveFields.headingsReversed,
+                    swerveDriveFields.previousTurningVector, new int[] {},
+                    false, swerveDriveFields.headingsNegativeOrNot);
             return;
         }
 
@@ -408,32 +343,43 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
         int headingFLBR = -45, headingFRBL = 45;
 
-        int totalHeadingFrontLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[0], headingFLBR, 0);
-        int reversedHeadingFrontLeft = calculateReverseHeading(totalHeadingFrontLeft, headingFLBR, swerveDriveFields.individualWheelHeadings[0]);
+        for(int i = 0; i < swerveDriveFields.turningMotors.length; i++) {
+            if(i == 0 || i == 2) {
+                int normalizedHeadingForWheel = normalizeHeading(swerveDriveFields.individualWheelHeadings[i], headingFLBR);
+                int totalHeadingForWheel = swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel, normalizedHeadingForWheel,
+                        swerveDriveFields.individualWheelHeadings[i]);
 
-        int totalHeadingFrontRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[1], headingFRBL, 1);
-        int reversedHeadingFrontRight = calculateReverseHeading(totalHeadingFrontRight, headingFRBL, swerveDriveFields.individualWheelHeadings[1]);
+                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] + reversedHeadingForWheel :
+                        swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
 
-        int totalHeadingBackLeft = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[2], headingFLBR, 2);
-        int reversedHeadingBackLeft = calculateReverseHeading(totalHeadingBackLeft, headingFLBR, swerveDriveFields.individualWheelHeadings[2]);
+                swerveDriveFields.individualWheelHeadings[i] = normalizeHeading(0, swerveDriveFields.individualWheelHeadings[i]);
+                targetPosition = normalizeHeading(0, targetPosition);
+                swerveDriveFields.individualTargetPositions[i] = targetPosition;
+                swerveDriveFields.headingsReversed[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL;
 
-        int totalHeadingBackRight = calculateTotalHeading(swerveDriveFields.individualWheelHeadings[3], headingFRBL, 3);
-        int reversedHeadingBackRight = calculateReverseHeading(totalHeadingBackRight, headingFRBL, swerveDriveFields.individualWheelHeadings[3]);
+                swerveDriveFields.turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
+                swerveDriveFields.individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                        reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+            } else {
+                int normalizedHeadingForWheel = normalizeHeading(swerveDriveFields.individualWheelHeadings[i], headingFRBL);
+                int totalHeadingForWheel = swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel, normalizedHeadingForWheel,
+                        swerveDriveFields.individualWheelHeadings[i]);
 
-        swerveDriveFields.headingsReversed[0] = reversedHeadingFrontLeft != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[1] = reversedHeadingFrontRight != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[2] = reversedHeadingBackLeft != Constants.SwerveConstants.NO_REVERSAL;
-        swerveDriveFields.headingsReversed[3] = reversedHeadingBackRight != Constants.SwerveConstants.NO_REVERSAL;
+                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] + reversedHeadingForWheel :
+                        swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
 
-        swerveDriveFields.individualWheelHeadings[0] = swerveDriveFields.headingsReversed[0] ? swerveDriveFields.individualWheelHeadings[0] + reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-        swerveDriveFields.individualWheelHeadings[1] = swerveDriveFields.headingsReversed[1] ? swerveDriveFields.individualWheelHeadings[1] + reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-        swerveDriveFields.individualWheelHeadings[2] = swerveDriveFields.headingsReversed[2] ? swerveDriveFields.individualWheelHeadings[2] + reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-        swerveDriveFields.individualWheelHeadings[3] = swerveDriveFields.headingsReversed[3] ? swerveDriveFields.individualWheelHeadings[3] + reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
+                swerveDriveFields.individualWheelHeadings[i] = normalizeHeading(0, swerveDriveFields.individualWheelHeadings[i]);
+                targetPosition = normalizeHeading(0, targetPosition);
+                swerveDriveFields.individualTargetPositions[i] = targetPosition;
+                swerveDriveFields.headingsReversed[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL;
 
-        swerveDriveFields.previousTargetPositions[0] = swerveDriveFields.headingsReversed[0] ? reversedHeadingFrontLeft : swerveDriveFields.individualTargetPositions[0];
-        swerveDriveFields.previousTargetPositions[1] = swerveDriveFields.headingsReversed[1] ? reversedHeadingFrontRight : swerveDriveFields.individualTargetPositions[1];
-        swerveDriveFields.previousTargetPositions[2] = swerveDriveFields.headingsReversed[2] ? reversedHeadingBackLeft : swerveDriveFields.individualTargetPositions[2];
-        swerveDriveFields.previousTargetPositions[3] = swerveDriveFields.headingsReversed[3] ? reversedHeadingBackRight : swerveDriveFields.individualTargetPositions[3];
+                swerveDriveFields.turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
+                swerveDriveFields.individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? swerveDriveFields.individualWheelHeadings[i] +
+                        reversedHeadingForWheel : swerveDriveFields.individualWheelHeadings[i] + normalizedHeadingForWheel;
+            }
+        }
     }
 
     @Override
@@ -442,17 +388,12 @@ public class ThreadBasedSwerveDrive extends Swerve {
     }
 
     @Override
-    public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition) {
+    public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition, boolean[] headingDirectionsNegative) {
         if(goToPosition) {
-            swerveDriveFields.turningMotors[0].setTargetPosition(targetPositions[0]);
-            swerveDriveFields.turningMotors[1].setTargetPosition(targetPositions[1]);
-            swerveDriveFields.turningMotors[2].setTargetPosition(targetPositions[2]);
-            swerveDriveFields.turningMotors[3].setTargetPosition(targetPositions[3]);
-
-            setPowerToIndividualWheel(0, headingsReversed[0]);
-            setPowerToIndividualWheel(1, headingsReversed[1]);
-            setPowerToIndividualWheel(2, headingsReversed[2]);
-            setPowerToIndividualWheel(3, headingsReversed[3]);
+            setPowerToIndividualWheel(0, headingDirectionsNegative[0]);
+            setPowerToIndividualWheel(1, headingDirectionsNegative[1]);
+            setPowerToIndividualWheel(2, headingDirectionsNegative[2]);
+            setPowerToIndividualWheel(3, headingDirectionsNegative[3]);
 
             while(!allWheelsHaveRotatedToPosition()) {
                 try {
@@ -474,10 +415,10 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
     @Override
     public void setPower(boolean[] headingIsNegative,  double forwardVector) {
-        setPowerToIndividualWheel(0, swerveDriveFields.headingsReversed[0]);
-        setPowerToIndividualWheel(1, swerveDriveFields.headingsReversed[1]);
-        setPowerToIndividualWheel(2, swerveDriveFields.headingsReversed[2]);
-        setPowerToIndividualWheel(3, swerveDriveFields.headingsReversed[3]);
+        setPowerToIndividualWheel(0, headingIsNegative[0]);
+        setPowerToIndividualWheel(1, headingIsNegative[1]);
+        setPowerToIndividualWheel(2, headingIsNegative[2]);
+        setPowerToIndividualWheel(3, headingIsNegative[3]);
 
         while(!allWheelsHaveRotatedToPosition()) {
             try {
