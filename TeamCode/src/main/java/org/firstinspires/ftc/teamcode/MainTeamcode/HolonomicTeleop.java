@@ -22,7 +22,7 @@ public class HolonomicTeleop extends CommandOpMode {
         Motor[] HDriveMotors = new Motor[] {
               new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),
-                new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor)
+                new Motor(hardwareMap, Constants.MotorConstants.backLeftMotor)
         },
 
         XDriveMotors = new Motor[] {
