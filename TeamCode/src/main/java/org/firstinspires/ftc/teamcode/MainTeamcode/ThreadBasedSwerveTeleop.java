@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.ThreadBasedS
 @TeleOp(name = "ThreadBasedSwerveTeleop", group = "teamcode")
 public class ThreadBasedSwerveTeleop extends CommandOpMode {
 
+    /**Initializing all necessary variables at the start of the FTC program, when this method is called.*/
     @Override
     public void initialize() {
         GamepadEx gamepadEx = new GamepadEx(gamepad1);

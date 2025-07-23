@@ -31,24 +31,6 @@ public class ThreadBasedSwerveDrive extends Swerve {
     private final Motor[] turningMotors, drivingMotors;
     private final Telemetry telemetry;
 
-    public List <boolean[]> getRobotBooleanArrays() {
-        return List.of(this.headingsReversed.clone(), this.headingsNegativeOrNot.clone(),
-                this.wheelsHaveRotated.clone());
-    }
-
-    public List <Double> getForwardVectorAndNormalizedHeading() {
-        double forwardVector = this.forwardVector;
-        double normalizedHeading = this.normalizedHeading;
-        return List.of(forwardVector, normalizedHeading);
-    }
-
-    public List <Boolean> getRobotBooleans() {
-        boolean previousTurningLeft = this.previousTurningLeft;
-        boolean fieldOriented = this.fieldOriented;
-        boolean alreadyRotated = this.alreadyRotated;
-        return List.of(previousTurningLeft, fieldOriented, alreadyRotated);
-    }
-
     Runnable[] runnables = new Runnable[] {
             () -> {},
             () -> {},
@@ -217,8 +199,30 @@ public class ThreadBasedSwerveDrive extends Swerve {
             thread.start();
         }
 
-        BackEndServer backEndServer = new BackEndServer(4000, "RoboticsGUIUpdaterThread");
+        BackEndServer backEndServer = new BackEndServer(4000);
         backEndServer.start();
+    }
+
+    public List <boolean[]> getRobotBooleanArrays() {
+        return List.of(this.headingsReversed.clone(), this.headingsNegativeOrNot.clone(),
+                this.wheelsHaveRotated.clone());
+    }
+
+    public List <Double> getForwardVectorAndNormalizedHeading() {
+        double forwardVector = this.forwardVector;
+        double normalizedHeading = this.normalizedHeading;
+        return List.of(forwardVector, normalizedHeading);
+    }
+
+    public List <Boolean> getRobotBooleans() {
+        boolean previousTurningLeft = this.previousTurningLeft;
+        boolean fieldOriented = this.fieldOriented;
+        boolean alreadyRotated = this.alreadyRotated;
+        return List.of(previousTurningLeft, fieldOriented, alreadyRotated);
+    }
+
+    public int[] getTargetPositions() {
+        return individualTargetPositions.clone();
     }
 
     @Override

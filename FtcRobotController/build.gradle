@@ -27,4 +27,8 @@ android {
     namespace = 'com.qualcomm.ftcrobotcontroller'
 }
 
+dependencies {
+    implementation files('C:\\Users\\russe\\Downloads\\gson-2.10.1 (1).jar')
+}
+
 apply from: '../build.dependencies.gradle'

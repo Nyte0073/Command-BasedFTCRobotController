@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.HolonomicDri
 @TeleOp(name = "HolonomicTeleop", group = "teamcode")
 public class HolonomicTeleop extends CommandOpMode {
 
+    /**Initializing all necessary variables at the start of the FTC program, when this method is called.*/
     @Override
     public void initialize() {
 

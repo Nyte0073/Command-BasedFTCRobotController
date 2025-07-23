@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces;
 
-import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.ThreadBasedSwerveDrive;
-
 import java.util.List;
 
+/**Class containing all the inner classes that pertain to each drivetrain type, and they are responsible for gathering and cloning all
+ * the information gathered during robot operation and storing it in one place, ready to be transferred over to another class for display
+ * in a GUI.*/
 public class RobotLog {
 
-    private final ThreadBasedSwerveDrive threadBasedSwerveDrive = new ThreadBasedSwerveDrive();
+    /**Responsible for cloning and gathering robot information for the {@code SwerveDrive} class.*/
     public static class SwerveLog {
 
     }
 
+    /**Responsible for cloning and gathering robot information for the {@code ThreadBasedSwerveDrive} class.*/
     public static class ThreadBasedSwerveLog {
         boolean[] headingsReversed = new boolean[4], headingsNegativeOrNot = new boolean[4],
         wheelsHaveRotated = new boolean[4];
@@ -18,8 +20,9 @@ public class RobotLog {
         double forwardVector = 0, normalizedHeading = 0;
 
         boolean previousTurningLeft = false, fieldOriented = false, alreadyRotated = false;
+        int[] targetPositions = new int[4];
 
-        public Object[] setThreadBasedSwerveLog(List <boolean[]> booleanArrays, List <Double> forwardNormalized, List <Boolean> booleans) {
+        public void setThreadBasedSwerveLog(List <boolean[]> booleanArrays, List <Double> forwardNormalized, List <Boolean> booleans, int[] targetPositions) {
             headingsReversed = booleanArrays.get(0);
             headingsNegativeOrNot = booleanArrays.get(1);
             wheelsHaveRotated = booleanArrays.get(2);
@@ -30,20 +33,21 @@ public class RobotLog {
             previousTurningLeft = booleans.get(0);
             fieldOriented = booleans.get(1);
             alreadyRotated = booleans.get(2);
-
-            return new Object[] {headingsReversed, headingsNegativeOrNot, wheelsHaveRotated, forwardVector, normalizedHeading,
-            previousTurningLeft, fieldOriented, alreadyRotated};
+            this.targetPositions = targetPositions;
         }
     }
 
+    /**Responsible for cloning and gathering robot information for the {@code HolonomicDrive} class.*/
     public static class HolonomicLog {
 
     }
 
+    /**Responsible for cloning and gathering robot information for the {@code MecanumDrive} class.*/
     public static class MecanumLog {
 
     }
 
+    /**Responsible for cloning and gathering robot information for the {@code DifferentialDrive} class.*/
     public static class DifferentialLog {
 
     }

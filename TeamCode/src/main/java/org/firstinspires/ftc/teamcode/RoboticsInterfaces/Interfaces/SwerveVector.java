@@ -38,26 +38,32 @@ public class SwerveVector {
         return Math.hypot(forwardPower, sidePower) / Constants.SwerveConstants.vectorScalar;
     }
 
+    /**Returns the forward facing motor of the robot.*/
     public double getForwardPower() {
         return forwardPower;
     }
 
+    /**Returns the side facing motor power of the robot.*/
     public double getSidePower() {
         return sidePower;
     }
 
+    /**Returns the factor of which the robot will rotate left or right by in terms of power.*/
     public double getTurningVector() {
         return turningVector;
     }
 
+    /**Returns the current heading of the robot in degrees.*/
     public int getImuHeadingInDegrees() {
         return imuHeadingInDegrees;
     }
 
+    /**Returns whether the robot is being driven field-oriented or not.*/
     public boolean getFieldOriented() {
         return fieldOriented;
     }
 
+    /**Returns whether the robot is rotating to the left or the right, on the spot.*/
     public boolean getTurningLeft() {
         return turningLeft;
     }

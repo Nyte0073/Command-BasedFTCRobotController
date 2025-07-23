@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.Differential
 @TeleOp(name = "DifferentialTeleop", group = "teamcode")
 public class DifferentialTeleop extends CommandOpMode {
 
+    /**Initializing all necessary variables at the start of the FTC program, when this method is called.*/
     @Override
     public void initialize() {
 

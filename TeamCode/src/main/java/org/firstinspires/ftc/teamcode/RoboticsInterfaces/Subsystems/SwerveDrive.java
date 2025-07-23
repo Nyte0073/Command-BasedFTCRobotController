@@ -370,7 +370,7 @@ public class SwerveDrive extends Swerve {
         }
 
         if(alreadyRotated.get()) {
-            setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, new int[] {}, false);
+            setPowerForCompleteRotate(previousTurningLeft, headingsReversed, previousTurningVector, new int[] {}, false, new boolean[]{});
             return;
         }
 
@@ -410,7 +410,7 @@ public class SwerveDrive extends Swerve {
                 headingsReversed[1] ? reversedHeadingFrontRight : individualTargetPositions[1],
                 headingsReversed[2] ? reversedHeadingBackLeft : individualTargetPositions[2],
                 headingsReversed[3] ? reversedHeadingBackRight : individualTargetPositions[3]
-        }, true);
+        }, true, new boolean[]{});
     }
 
     @Override
@@ -419,7 +419,7 @@ public class SwerveDrive extends Swerve {
     }
 
     @Override
-    public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition) {
+    public void setPowerForCompleteRotate(boolean turningLeft, boolean[] headingsReversed, double turningVector, int[] targetPositions, boolean goToPosition, boolean[] headingsDirectionsNegative) {
         CompletableFuture.runAsync(() -> {
             if(goToPosition) {
                 turningMotors[0].setTargetPosition(targetPositions[0]);

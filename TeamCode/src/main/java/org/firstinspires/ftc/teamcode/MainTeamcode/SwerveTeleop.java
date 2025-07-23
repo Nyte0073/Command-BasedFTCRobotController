@@ -11,10 +11,10 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.SwerveDrive;
 
 @TeleOp(name = "SwerveTeleop", group = "teamcode")
 public class SwerveTeleop extends CommandOpMode {
+
+    /**Initializing all necessary variables at the start of the FTC program, when this method is called.*/
     @Override
     public void initialize() {
-
-        /*Initializing everything for the SwerveDrive subsystem and the SwerveDriveCommand.*/
         Motor[] turningMotors = new Motor[] {
                 new Motor(hardwareMap, Constants.MotorConstants.frontLeftMotor),
                 new Motor(hardwareMap, Constants.MotorConstants.frontRightMotor),

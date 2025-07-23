@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.MecanumDrive
 @TeleOp(name = "MecanumTeleop", group = "teamcode")
 public class MecanumTeleop extends CommandOpMode {
 
-    /*Initializing the requisite components for the MecanumDrive subsystem and MecanumDriveCommands.*/
+    /**Initializing all necessary variables at the start of the FTC program, when this method is called.*/
     @Override
     public void initialize() {
         Motor[] motors = new Motor[] {
