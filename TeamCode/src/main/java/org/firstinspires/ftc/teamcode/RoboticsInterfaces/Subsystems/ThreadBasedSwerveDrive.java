@@ -16,21 +16,48 @@ import java.util.List;
 
 public class ThreadBasedSwerveDrive extends Swerve {
 
+    /**Reference to the robot's IMU system, returning the heading that the robot is currently facing.*/
     private final IMU imu;
+
+    /**The factor by which the driving motors' motor powers will be tuned to for driving.*/
     private volatile double forwardVector = 0;
+
+    /**The normalized, calculated heading for the robot to move in the direction of, relative ot the current heading of the ROBOT,
+     * NOT the wheels.*/
     private volatile int normalizedHeading = 0;
+
+    /**Boolean arrays for keeping track of if the headings of the turning wheels are reversed, if those headings are negative or not,
+     * and if the wheels have rotated.*/
     private final boolean[] headingsReversed = new boolean[4],
             headingsNegativeOrNot = new boolean[4], wheelsHaveRotated = new boolean[4];
+
+    /**Integer arrays for keeping track of the individual headings of each turning wheel and their individual target positions.*/
     private final int[] individualWheelHeadings = new int[4], individualTargetPositions = new int[4],
             previousTargetPositions = new int[4];
+
+    /**Boolean state for if the robot will be rotating on the spot to the left or to the right.*/
     private volatile boolean previousTurningLeft = false;
+
+    /**Boolean state for if the robot will be driving field-oriented or robot oriented.*/
     private final boolean fieldOriented;
+
+    /**Boolean state for if the robot has already underwent a complete rotation without having its turing wheels reset yet.*/
     private volatile boolean alreadyRotated = false;
+
+    /**Reference to the human driver's Xbox controller.*/
     private final GamepadEx gamepadEx;
+
+    /**Boolean state for if the robot is requesting to the completely stop its turning and driving motors.*/
     public static boolean stopMotorsIsRunning = false;
+
+    /**{@code Motor} arrays for keeping references to the robot's turning and driving motors.*/
     private final Motor[] turningMotors, drivingMotors;
+
+    /**The robot's information sending system. Use {@code telemetry} to send information regarding the states of all the hardware on
+     * the robot pertaining to this subsystem to the Driver Station screen for you to view while you're driving the robot.*/
     private final Telemetry telemetry;
 
+    /**{@code Runnable} array to keep references to the tasks that the different threads within this subsystem will be carrying out.*/
     Runnable[] runnables = new Runnable[] {
             () -> {},
             () -> {},
@@ -39,11 +66,18 @@ public class ThreadBasedSwerveDrive extends Swerve {
             () -> {}
     };
 
+    /**Object to use with the threads' {@code synchronized() {}} blocks to act as lock that only thread can hold at a time. This means
+     * that having this object will ensure that only the thread with this object can execute synchronized code at will.*/
     private final Object driveLock = new Object();
 
+    /**Reference to the current driving state of the robot.*/
     private volatile SwerveState swerveState = SwerveState.IDLE;
+
+    /**Reference to current state of the robot's rotational abilities.*/
     private volatile CompleteRotations rotations = CompleteRotations.ROTATION_WAS_NOT_DONE;
 
+    /**{@code Thread} array for keeping references to all the different threads this subsystem will be using to execute different driving
+     * actions asynchronously and separately.*/
     Thread[] threads = {
             new Thread( //Driving thread.
                     () -> {
@@ -161,6 +195,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
             )
     };
 
+    /**Constant class for keeping references to all the robot's possible driving states.*/
     enum SwerveState {
         IDLE,
         DRIVE,
@@ -168,11 +203,14 @@ public class ThreadBasedSwerveDrive extends Swerve {
         RESET_WHEEL
     }
 
+    /**Constant class for keeping references to all the robot's possible rotation states.*/
     enum CompleteRotations {
         ROTATION_WAS_DONE,
         ROTATION_WAS_NOT_DONE
     }
 
+    /**Constructs an empty {@code ThreadBasedSwerveDrive()} that is typically used for referencing void methods, NOT for initializing
+     *the subsystem in a Teleop class.*/
     public ThreadBasedSwerveDrive() {
         this(null, new Motor[]{}, new Motor[]{}, null, null, false);
     }
