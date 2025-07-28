@@ -7,12 +7,14 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
-import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.BackEndServer;
+import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.FrontEndServer;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.Swerve;
+import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.SwerveMath;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces.SwerveVector;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class ThreadBasedSwerveDrive extends Swerve {
 
@@ -237,7 +239,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
             thread.start();
         }
 
-        BackEndServer backEndServer = new BackEndServer(4000);
+        FrontEndServer backEndServer = new FrontEndServer(8000, "10.0.2.2");
         backEndServer.start();
     }
 
@@ -306,23 +308,19 @@ public class ThreadBasedSwerveDrive extends Swerve {
            normalizedHeading = normalizeHeading(headingInDegrees, heading);
 
            for(int i = 0; i < turningMotors.length; i++) {
-               int normalizedHeadingForWheel = normalizeHeading(individualWheelHeadings[i], normalizedHeading);
-               int totalHeadingForWheel = individualWheelHeadings[i] + normalizedHeadingForWheel;
-               int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel,
-                       individualWheelHeadings[i]);
-
-               int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ?  individualWheelHeadings[i] +
-                       reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
+               BiFunction<Integer, Integer, int[]> getMotorValues = SwerveMath.calculateNormalizedHeadingForWheel.andThen(
+                       SwerveMath.calculateTotalHeadingForWheel
+               ).andThen(SwerveMath.calculateReversedHeadingForWheel).andThen(SwerveMath.calculateTargetPositionAndFinalizeValues);
+               int[] values = getMotorValues.apply(individualWheelHeadings[i], normalizedHeading);
 
                individualWheelHeadings[i] = normalizeHeading(0, individualWheelHeadings[i]);
+               int targetPosition = values[3];
                targetPosition = normalizeHeading(0, targetPosition);
                individualTargetPositions[i] = targetPosition;
+               headingsNegativeOrNot[i] = values[4] < 0;
 
-               headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
-
-               turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
-               individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                       reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
+               turningMotors[i].setTargetPosition(turningMotors[i].getCurrentPosition() + ((targetPosition / 360) * 1440));
+               individualWheelHeadings[i] += values[4];
            }
         };
 
@@ -354,24 +352,20 @@ public class ThreadBasedSwerveDrive extends Swerve {
             forwardVector = Math.hypot(sidePower, forwardPower) / Constants.SwerveConstants.vectorScalar;
             normalizedHeading = normalizeHeading(0, heading);
 
-            for (int i = 0; i < turningMotors.length; i++) {
-                int normalizedHeadingForWheel = normalizeHeading(individualWheelHeadings[i], normalizedHeading);
-                int totalHeadingForWheel = individualWheelHeadings[i] + normalizedHeadingForWheel;
-                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel,
-                        individualWheelHeadings[i]);
-
-                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                        reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
+            for(int i = 0; i < turningMotors.length; i++) {
+                BiFunction<Integer, Integer, int[]> getMotorValues = SwerveMath.calculateNormalizedHeadingForWheel.andThen(
+                        SwerveMath.calculateTotalHeadingForWheel
+                ).andThen(SwerveMath.calculateReversedHeadingForWheel).andThen(SwerveMath.calculateTargetPositionAndFinalizeValues);
+                int[] values = getMotorValues.apply(individualWheelHeadings[i], normalizedHeading);
 
                 individualWheelHeadings[i] = normalizeHeading(0, individualWheelHeadings[i]);
+                int targetPosition = values[3];
                 targetPosition = normalizeHeading(0, targetPosition);
                 individualTargetPositions[i] = targetPosition;
+                headingsNegativeOrNot[i] = values[4] < 0;
 
-                headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
-
-                turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
-                individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                        reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
+                turningMotors[i].setTargetPosition(turningMotors[i].getCurrentPosition() + ((targetPosition / 360) * 1440));
+                individualWheelHeadings[i] += values[4];
             }
         };
 
@@ -395,22 +389,19 @@ public class ThreadBasedSwerveDrive extends Swerve {
         int botHeading = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
         for(int i = 0; i < turningMotors.length; i++) {
-            int normalizedHeadingForWheel = normalizeHeading(individualWheelHeadings[i], botHeading);
-            int totalHeading = individualWheelHeadings[i] + normalizedHeadingForWheel;
-            int reversedHeading = calculateReverseHeading(totalHeading, individualWheelHeadings[i]);
-
-            int targetPosition = reversedHeading != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] + reversedHeading :
-                   individualWheelHeadings[i] + normalizedHeadingForWheel;
+            BiFunction<Integer, Integer, int[]> getMotorValues = SwerveMath.calculateNormalizedHeadingForWheel.andThen(
+                    SwerveMath.calculateTotalHeadingForWheel
+            ).andThen(SwerveMath.calculateReversedHeadingForWheel).andThen(SwerveMath.calculateTargetPositionAndFinalizeValues);
+            int[] values = getMotorValues.apply(individualWheelHeadings[i], botHeading);
 
             individualWheelHeadings[i] = normalizeHeading(0, individualWheelHeadings[i]);
+            int targetPosition = values[3];
             targetPosition = normalizeHeading(0, targetPosition);
             individualTargetPositions[i] = targetPosition;
-            headingsReversed[i] = reversedHeading != Constants.SwerveConstants.NO_REVERSAL;
-            headingsNegativeOrNot[i] = targetPosition != Math.abs(targetPosition);
+            headingsNegativeOrNot[i] = values[4] < 0;
 
-            turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
-            individualWheelHeadings[i] = reversedHeading != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                    reversedHeading : individualWheelHeadings[i] + normalizedHeadingForWheel;
+            turningMotors[i].setTargetPosition(turningMotors[i].getCurrentPosition() + ((targetPosition / 360) * 1440));
+            individualWheelHeadings[i] += values[4];
         }
 
         for(int i = 0; i < turningMotors.length; i++) {
@@ -447,38 +438,36 @@ public class ThreadBasedSwerveDrive extends Swerve {
         int headingFLBR = -45, headingFRBL = 45;
 
         for(int i = 0; i < turningMotors.length; i++) {
-            if(i == 0 || i == 3) {
-                int normalizedHeadingForWheel = normalizeHeading(individualWheelHeadings[i], headingFLBR);
-                int totalHeadingForWheel = individualWheelHeadings[i] + normalizedHeadingForWheel;
-                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel, individualWheelHeadings[i]);
-
-                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] + reversedHeadingForWheel :
-                        individualWheelHeadings[i] + normalizedHeadingForWheel;
+            if(i == 0 || i == 3) { //headingFlBR, remember to add headingsReversed[i] = values[4] == Constants.SwerveConstants.NO_REVERSAL;
+                BiFunction<Integer, Integer, int[]> getMotorValues = SwerveMath.calculateNormalizedHeadingForWheel.andThen(
+                        SwerveMath.calculateTotalHeadingForWheel
+                ).andThen(SwerveMath.calculateReversedHeadingForWheel).andThen(SwerveMath.calculateTargetPositionAndFinalizeValues);
+                int[] values = getMotorValues.apply(individualWheelHeadings[i], headingFLBR);
 
                 individualWheelHeadings[i] = normalizeHeading(0, individualWheelHeadings[i]);
+                int targetPosition = values[3];
                 targetPosition = normalizeHeading(0, targetPosition);
                 individualTargetPositions[i] = targetPosition;
-                headingsReversed[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL;
+                headingsNegativeOrNot[i] = values[4] < 0;
+                headingsReversed[i] = values[4] == Constants.SwerveConstants.NO_REVERSAL;
 
-                turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
-                individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                        reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
-            } else {
-                int normalizedHeadingForWheel = normalizeHeading(individualWheelHeadings[i], headingFRBL);
-                int totalHeadingForWheel = individualWheelHeadings[i] + normalizedHeadingForWheel;
-                int reversedHeadingForWheel = calculateReverseHeading(totalHeadingForWheel, individualWheelHeadings[i]);
-
-                int targetPosition = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] + reversedHeadingForWheel :
-                        individualWheelHeadings[i] + normalizedHeadingForWheel;
+                turningMotors[i].setTargetPosition(turningMotors[i].getCurrentPosition() + ((targetPosition / 360) * 1440));
+                individualWheelHeadings[i] += values[4];
+            } else { //headingFRBL
+                BiFunction<Integer, Integer, int[]> getMotorValues = SwerveMath.calculateNormalizedHeadingForWheel.andThen(
+                        SwerveMath.calculateTotalHeadingForWheel
+                ).andThen(SwerveMath.calculateReversedHeadingForWheel).andThen(SwerveMath.calculateTargetPositionAndFinalizeValues);
+                int[] values = getMotorValues.apply(individualWheelHeadings[i], headingFRBL);
 
                 individualWheelHeadings[i] = normalizeHeading(0, individualWheelHeadings[i]);
+                int targetPosition = values[3];
                 targetPosition = normalizeHeading(0, targetPosition);
                 individualTargetPositions[i] = targetPosition;
-                headingsReversed[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL;
+                headingsNegativeOrNot[i] = values[4] < 0;
+                headingsReversed[i] = values[4] == Constants.SwerveConstants.NO_REVERSAL;
 
-                turningMotors[i].setTargetPosition((targetPosition / 360) * 1440);
-                individualWheelHeadings[i] = reversedHeadingForWheel != Constants.SwerveConstants.NO_REVERSAL ? individualWheelHeadings[i] +
-                        reversedHeadingForWheel : individualWheelHeadings[i] + normalizedHeadingForWheel;
+                turningMotors[i].setTargetPosition(turningMotors[i].getCurrentPosition() + ((targetPosition / 360) * 1440));
+                individualWheelHeadings[i] += values[4];
             }
         }
     }

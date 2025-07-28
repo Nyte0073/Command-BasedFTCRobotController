@@ -36,6 +36,12 @@ public class ThreadBasedSwerveDriveCommand extends CommandBase {
         } else if(gamepadEx.wasJustPressed(GamepadKeys.Button.B)) {
             swerveDrive.stopMotors();
             swerveDrive.stopThreads();
+        } else {
+           try {
+               swerveDrive.drive();
+           } catch(Exception e) {
+               throw new RuntimeException(e);
+           }
         }
     }
 }

@@ -6,13 +6,15 @@ import com.google.gson.Gson;
 import org.firstinspires.ftc.teamcode.RoboticsInterfaces.Subsystems.ThreadBasedSwerveDrive;
 
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 
-public class BackEndServer extends Thread {
+public class FrontEndServer extends Thread {
 
     /**The port used to connect the {@code BackEndServer} and {@code RobotGUIUpdater} classes together over a network.*/
     private final int serverPort;
+
+    /**The reference to the host of the server.*/
+    private final String host;
 
     /**Reference to the {@code ThreadBasedSwerveDrive} object being used to return all the information about the robot's current state.*/
     private final ThreadBasedSwerveDrive swerveDrive = new ThreadBasedSwerveDrive();
@@ -22,8 +24,9 @@ public class BackEndServer extends Thread {
     private final RobotLog.ThreadBasedSwerveLog swerveLog = new RobotLog.ThreadBasedSwerveLog();
 
     /**Constructs a new {@code BackEndServer()} with an initialized {@code serverPort} field.*/
-    public BackEndServer(int serverPort) {
+    public FrontEndServer(int serverPort, String host) {
         this.serverPort = serverPort;
+        this.host = host;
     }
 
     /**Launches the server to start sending information to the {@code RobotGUIUpdater} class for it to start updating. This method also
@@ -31,9 +34,8 @@ public class BackEndServer extends Thread {
      * before the {@code RobotGUIUpdater} class calls its {@code launchGUIServer()} method, because this method is responsible for creating the server
      * for {@code RobotGUIUpdater} to connect to.*/
     public void launchServer() throws Exception {
-        ServerSocket serverSocket = new ServerSocket(serverPort);
-        Socket socket = serverSocket.accept();
-        Log.i(getClass().getSimpleName(), "Socket connected");
+        Socket socket = new Socket(host, serverPort);
+        Log.i(getClass().getSimpleName(), "FrontEndServer Socket connected.");
         Gson gson = new Gson();
         OutputStream outputStream = socket.getOutputStream();
 
