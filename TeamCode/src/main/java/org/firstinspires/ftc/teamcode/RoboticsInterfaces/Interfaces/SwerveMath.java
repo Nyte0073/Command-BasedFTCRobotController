@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.RoboticsInterfaces.Interfaces;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class SwerveMath {
 
@@ -24,6 +25,9 @@ public final class SwerveMath {
         int targetPosition = i[1] + heading;
         return new int[] {i[0], i[1], i[2], targetPosition, heading}; //reversed heading = i[0], current heading = i[1], normalized heading = i[2], target position = i[3], heading = i[4]
     };
+    public static final Supplier<BiFunction<Integer, Integer, int[]>> getMotorValues = () -> calculateNormalizedHeadingForWheel.andThen(calculateTotalHeadingForWheel).andThen(
+            calculateReversedHeadingForWheel
+    ).andThen(calculateTargetPositionAndFinalizeValues);
     private static int normalizedHeading(int currentPosition, int targetPosition) {
         return (targetPosition - currentPosition + 540) % 360 - 180;
     }

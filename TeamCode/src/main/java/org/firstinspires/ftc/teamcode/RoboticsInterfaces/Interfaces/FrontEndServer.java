@@ -17,7 +17,7 @@ public class FrontEndServer extends Thread {
     private final String host;
 
     /**Reference to the {@code ThreadBasedSwerveDrive} object being used to return all the information about the robot's current state.*/
-    private final ThreadBasedSwerveDrive swerveDrive = new ThreadBasedSwerveDrive();
+    private final ThreadBasedSwerveDrive swerveDrive = ThreadBasedSwerveDrive.getEmptyInstance();
 
     /**Reference to the {@code RobotLog.ThreadBasedSwerveLog} class that is responsible for cloning all the robot information and
      * gathering it all into one class to send to the {@code RobotGUIUpdater} class in IntelliJ IDEA all at once.*/
