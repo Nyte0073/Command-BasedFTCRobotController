@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MainTeamcode.Constants;
@@ -78,6 +79,8 @@ public class ThreadBasedSwerveDrive extends Swerve {
     private volatile CompleteRotations rotations = CompleteRotations.ROTATION_WAS_NOT_DONE;
 
     private static final ThreadBasedSwerveDrive emptyInstance = new ThreadBasedSwerveDrive();
+
+    private final Supplier<Double> imuHeading;
 
     /**{@code Thread} array for keeping references to all the different threads this subsystem will be using to execute different driving
      * actions asynchronously and separately.*/
@@ -225,12 +228,13 @@ public class ThreadBasedSwerveDrive extends Swerve {
         this.imu = imu;
         this.gamepadEx = gamepadEx;
         this.fieldOriented = fieldOriented;
+        imuHeading = () -> imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         for(Motor m : turningMotors) {
             m.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             m.stopAndResetEncoder();
             m.setRunMode(Motor.RunMode.PositionControl);
-        }
+         }
 
         for(Motor m : drivingMotors) {
             m.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -378,7 +382,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
     @Override
     public void resetWheelHeading() {
         stopMotors();
-        int botHeading = (int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        int botHeading = (int) Math.round(imuHeading.get());
 
         for(int i = 0; i < turningMotors.length; i++) {
             int[] values = SwerveMath.getMotorValues.get().apply(individualWheelHeadings[i], botHeading);
@@ -530,7 +534,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
     @Override
     public SwerveVector getRobotVector() {
-        return new SwerveVector((int) Math.round(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)),
+        return new SwerveVector((int) Math.round(imuHeading.get()),
                 -gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX(), fieldOriented, gamepadEx.getRightX() != Math.abs(gamepadEx.getRightX()));
     }
 
