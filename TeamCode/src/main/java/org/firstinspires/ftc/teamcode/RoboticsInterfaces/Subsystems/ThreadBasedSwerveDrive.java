@@ -34,8 +34,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
             headingsNegativeOrNot = new boolean[4], wheelsHaveRotated = new boolean[4];
 
     /**Integer arrays for keeping track of the individual headings of each turning wheel and their individual target positions.*/
-    private final int[] individualWheelHeadings = new int[4], individualTargetPositions = new int[4],
-            previousTargetPositions = new int[4];
+    private final int[] individualWheelHeadings = new int[4], individualTargetPositions = new int[4];
 
     /**Boolean state for if the robot will be rotating on the spot to the left or to the right.*/
     private volatile boolean previousTurningLeft = false;
@@ -171,7 +170,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                    }
                                 }
 
-                                    /*For tis specific runnable below, you need to make sure that the code for the resetWheelHeading()
+                                    /*For this specific runnable below, you need to make sure that the code for the resetWheelHeading()
                                      * method inside this runnable is updated WITHIN THE THREAD ITSELF. It is because these values can change
                                      * very quickly and you need them to be EXACTLY up to date for the code in this runnable to work
                                      * effectively.*/

@@ -40,7 +40,7 @@ public class Constants {
 
         /**Constant for normalizing {@code forwardVector} motor powers so they can only go to a
          * maximum absolute value of 1.*/
-        public static final double vectorScalar = 1.4142135623730950488016887242097;
+        public static final double vectorScalar = Math.sqrt(2);
 
         /**Magic number for indicating that no reversal should happen for a motor.*/
         public static final int NO_REVERSAL = 2000;
