@@ -102,7 +102,6 @@ public abstract class Swerve extends SubsystemBase implements Driveable {
     /**Returns the RobotVector (user input information) about the robot.*/
     public abstract SwerveVector getRobotVector();
 
-
     /**Sets the power of the turning and driving wheels of the robot when driving normally at a certain angle.*/
     public abstract void setPower(boolean[] headingsReversed, double forwardVector);
 }

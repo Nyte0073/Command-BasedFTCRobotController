@@ -5,7 +5,7 @@ import java.util.List;
 /**Class containing all the inner classes that pertain to each drivetrain type, and they are responsible for gathering and cloning all
  * the information gathered during robot operation and storing it in one place, ready to be transferred over to another class for display
  * in a GUI.*/
-public class RobotLog {
+public final class RobotLog {
 
     /**Responsible for cloning and gathering robot information for the {@code SwerveDrive} class.*/
     public static class SwerveLog {

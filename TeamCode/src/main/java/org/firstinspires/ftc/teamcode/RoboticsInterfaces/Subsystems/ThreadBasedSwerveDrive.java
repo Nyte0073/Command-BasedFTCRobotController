@@ -330,7 +330,9 @@ public class ThreadBasedSwerveDrive extends Swerve {
         };
 
         runnables[1] = () -> setPower(headingsNegativeOrNot, forwardVector);
-        swerveState = SwerveState.DRIVE;
+        if(swerveState == SwerveState.IDLE) {
+            swerveState = SwerveState.DRIVE;
+        }
     }
 
     public void applyRobotOrientedSwerve(int heading, double forwardPower, double sidePower, double turningVector, boolean turningLeft) {
@@ -365,7 +367,9 @@ public class ThreadBasedSwerveDrive extends Swerve {
         };
 
         runnables[1] = () -> setPower(headingsNegativeOrNot, forwardVector);
-        swerveState = SwerveState.DRIVE;
+        if(swerveState == SwerveState.IDLE) {
+            swerveState = SwerveState.DRIVE;
+        }
     }
 
     @Override
