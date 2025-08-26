@@ -87,15 +87,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
             new Thread( //Driving thread.
                     () -> {
                         while(!Thread.currentThread().isInterrupted()) {
-                            synchronized (driveLock) {
-                                while(swerveState != SwerveState.DRIVE && swerveState != SwerveState.IDLE) {
-                                    try {
-                                        driveLock.wait();
-                                    } catch(Exception e) {
-                                        Thread.currentThread().interrupt();
-                                        break;
-                                    }
-                                }
+
                                 if(swerveState == SwerveState.DRIVE) {
                                     driveLock.notifyAll();
                                     runnables[0].run();
@@ -108,7 +100,6 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                     swerveState = SwerveState.IDLE;
                                     driveLock.notifyAll();
                                 }
-                            }
 
                             try {
                                 Thread.sleep(25);
@@ -123,15 +114,7 @@ public class ThreadBasedSwerveDrive extends Swerve {
             new Thread( //Complete rotate thread.
                     () -> {
                         while(!Thread.currentThread().isInterrupted()) {
-                            synchronized (driveLock) {
-                                while(swerveState != SwerveState.COMPLETE_ROTATE && swerveState != SwerveState.IDLE) {
-                                    try {
-                                        driveLock.wait();
-                                    } catch(Exception e) {
-                                        Thread.currentThread().interrupt();
-                                        break;
-                                    }
-                                }
+
                                 if(swerveState == SwerveState.COMPLETE_ROTATE) {
                                     driveLock.notifyAll();
                                     runnables[2].run();
@@ -145,7 +128,6 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                     rotations = CompleteRotations.ROTATION_WAS_DONE;
                                     driveLock.notifyAll();
                                 }
-                            }
 
                             try {
                                 Thread.sleep(25);
@@ -159,16 +141,6 @@ public class ThreadBasedSwerveDrive extends Swerve {
             new Thread( //Reset wheel thread.
                     () -> {
                         while(!Thread.currentThread().isInterrupted()) {
-                            synchronized (driveLock) {
-
-                                while(swerveState != SwerveState.RESET_WHEEL && swerveState != SwerveState.IDLE) {
-                                   try {
-                                       driveLock.wait();
-                                   } catch(Exception e) {
-                                       Thread.currentThread().interrupt();
-                                       break;
-                                   }
-                                }
 
                                     /*For this specific runnable below, you need to make sure that the code for the resetWheelHeading()
                                      * method inside this runnable is updated WITHIN THE THREAD ITSELF. It is because these values can change
@@ -187,7 +159,6 @@ public class ThreadBasedSwerveDrive extends Swerve {
                                     System.out.println("Wheels reset.");
                                     driveLock.notifyAll();
                                 }
-                            }
 
                             try {
                                 Thread.sleep(25);
@@ -279,6 +250,8 @@ public class ThreadBasedSwerveDrive extends Swerve {
 
         if(stopMotorsIsRunning) { //If this boolean is true, stop motors completely.
             stop();
+            return;
+        } else if(swerveState != SwerveState.IDLE) {
             return;
         }
 
